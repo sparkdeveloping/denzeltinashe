@@ -1125,17 +1125,17 @@ export default function Page() {
               <motion.div variants={fadeUp} className="mt-7 grid gap-5 lg:grid-cols-2">
                 <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
                   <p className="text-sm font-semibold tracking-[-0.02em]">Primary</p>
-                  <p className="mt-2 text-sm leading-6 text-black/70">Replace the email below with your real email.</p>
+                  {/* <p className="mt-2 text-sm leading-6 text-black/70">Replace the email below with your real email.</p> */}
 
                   <div className="mt-5 flex flex-wrap gap-2">
-                    <GlassButton primary href="mailto:denzel@example.com?subject=Project%20Inquiry%20—%20Denzel%20Tinashe">Email Me</GlassButton>
+                    <GlassButton primary href="mailto:denzelnyatsanza@gmail.com?subject=Project%20Inquiry%20—%20Denzel%20">Email Me</GlassButton>
                     <GlassButton href="/resume.pdf">Download Resume ↗</GlassButton>
                   </div>
                 </div>
 
                 <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                  <p className="text-sm font-semibold tracking-[-0.02em]">Quick Form (UI)</p>
-                  <p className="mt-2 text-sm leading-6 text-black/70">Wire to your backend or a form service later.</p>
+                  <p className="text-sm font-semibold tracking-[-0.02em]">Quick Message</p>
+                  {/* <p className="mt-2 text-sm leading-6 text-black/70">Wire to your backend or a form service later.</p> */}
 
                   <form className="mt-5 grid gap-3">
                     <input className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-black placeholder:text-black/40 outline-none backdrop-blur focus:ring-2 focus:ring-black/15" placeholder="Name" />
