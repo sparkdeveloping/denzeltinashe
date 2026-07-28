@@ -1,1176 +1,679 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-const EASE = [0.22, 1, 0.36, 1];
+const ease = [0.22, 1, 0.36, 1];
 
-function cx(...classes) {
-  return classes.filter(Boolean).join(' ');
+const practices = [
+  {
+    number: '01',
+    id: 'ministry',
+    label: 'Ministry',
+    title: 'Digital spaces that carry the message without diluting it.',
+    body: 'Websites, Christian products, podcast systems, campaign visuals, and event experiences built to help ministries communicate clearly and move people toward action.',
+    proof: ['BeforeUScroll', 'KDYM', 'FPC Wichita', 'Jesus Revealed'],
+    accent: 'lime',
+  },
+  {
+    number: '02',
+    id: 'media',
+    label: 'Media',
+    title: 'Visual systems with energy, consistency, and purpose.',
+    body: 'Creative direction, identity systems, motion, editing, campaign rollouts, and repeatable media workflows designed for real ministry calendars and real deadlines.',
+    proof: ['Campaign systems', 'Motion + editing', 'Event creative', 'Social delivery'],
+    accent: 'violet',
+  },
+  {
+    number: '03',
+    id: 'products',
+    label: 'Web / Mobile Apps',
+    title: 'Useful products, shaped into memorable experiences.',
+    body: 'Product strategy, interface design, Next.js builds, iOS development, full-stack implementation, and polished launches from first idea to shipped experience.',
+    proof: ['MealRecap', 'BeforeUScroll', 'Aftershock', 'Hacia'],
+    accent: 'coral',
+  },
+];
+
+const projects = [
+  {
+    id: 'mealrecap',
+    name: 'MealRecap',
+    year: '2026',
+    type: 'Mobile product / AI nutrition',
+    description: 'An AI-first food logger that turns natural language, voice, and meal photos into a calm daily nutrition recap.',
+    href: 'https://mealrecap.vercel.app',
+    tags: ['products'],
+    art: 'meal',
+    featured: true,
+  },
+  {
+    id: 'beforeuscroll',
+    name: 'BeforeUScroll',
+    year: '2026',
+    type: 'Christian iOS product',
+    description: 'A Scripture-and-prayer app blocker that turns attention into an intentional spiritual rhythm before distracting apps open.',
+    href: 'https://beforeuscroll.vercel.app',
+    tags: ['ministry', 'products'],
+    art: 'flame',
+    featured: true,
+  },
+  {
+    id: 'kdym',
+    name: 'KDYM',
+    year: '2024–2026',
+    type: 'Ministry website / media system',
+    description: 'A digital home for Kansas District Youth Ministries spanning events, registration, media, merch, and the 2026 Outpour identity.',
+    href: 'https://www.kdym.org',
+    tags: ['ministry', 'media', 'products'],
+    art: 'outpour',
+    featured: true,
+  },
+  {
+    id: 'fpcwichita',
+    name: 'FPC Wichita',
+    year: '2024–2026',
+    type: 'Church media / creative direction',
+    description: 'Brand-consistent visuals, event media, livestream support, and digital communication for a growing local church.',
+    href: 'https://www.fpcwichita.org',
+    tags: ['ministry', 'media'],
+    image: '/work/fpc-1.webp',
+  },
+  {
+    id: 'jesusrevealed',
+    name: 'Jesus Revealed Podcast',
+    year: 'Ongoing',
+    type: 'Podcast / production / editing',
+    description: 'A ministry media platform hosted, produced, and edited to make conversations about Jesus clear, thoughtful, and accessible across channels.',
+    href: 'https://www.youtube.com/@jesusrevealedpodcast',
+    tags: ['ministry', 'media'],
+    art: 'podcast',
+  },
+  {
+    id: 'aftershock',
+    name: 'Aftershock Ministries',
+    year: '2024–2025',
+    type: 'Ministry website / UX',
+    description: 'A responsive ministry website focused on clear messaging, trust, discoverability, and a direct path to connection.',
+    href: 'https://www.aftershockministries.com',
+    tags: ['ministry', 'products'],
+    image: '/work/aftershock-1.webp',
+  },
+  {
+    id: 'gocreate',
+    name: 'GoCreate / Wichita State ITS',
+    year: '2024–2025',
+    type: 'Systems / digital operations',
+    description: 'Digitized workflows and supported operational systems used in a live university-affiliated innovation environment.',
+    href: 'https://gocreate.com',
+    tags: ['products'],
+    image: '/work/gocreate-1.webp',
+  },
+  {
+    id: 'hacia',
+    name: 'Hacia',
+    year: '2024–2025',
+    type: 'Website / UI delivery',
+    description: 'A modern, responsive web presence shaped around hierarchy, clarity, and a premium visual finish.',
+    href: 'https://hacia.co.zw',
+    tags: ['products'],
+    image: '/work/hacia-1.webp',
+  },
+  {
+    id: 'poscloud',
+    name: 'PosCloud',
+    year: '2022',
+    type: 'Laravel / React full stack',
+    description: 'Practical product functionality delivered across PHP/Laravel backend systems and React interfaces.',
+    href: 'https://github.com/sparkdeveloping',
+    tags: ['products'],
+    art: 'code',
+  },
+];
+
+const capabilities = [
+  'Creative direction',
+  'Ministry websites',
+  'Mobile product design',
+  'Next.js + React',
+  'Swift / iOS',
+  'Motion + editing',
+  'Identity systems',
+  'Full-stack delivery',
+  'SEO + performance',
+  'Launch strategy',
+];
+
+function Arrow({ diagonal = false }) {
+  return <span aria-hidden>{diagonal ? '↗' : '→'}</span>;
 }
 
-/* -----------------------------
-   Hooks
------------------------------ */
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReduced(!!mq.matches);
-    update();
-    mq.addEventListener?.('change', update);
-    return () => mq.removeEventListener?.('change', update);
-  }, []);
-  return reduced;
+function LogoMark() {
+  return (
+    <a className="logo-mark" href="#top" aria-label="Denzel Tinashe, back to top">
+      <span>DT</span>
+      <i />
+    </a>
+  );
 }
 
-function useIsTouchDevice() {
-  const [touch, setTouch] = useState(false);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const isTouch =
-      'ontouchstart' in window ||
-      (navigator?.maxTouchPoints ?? 0) > 0 ||
-      (navigator?.msMaxTouchPoints ?? 0) > 0;
-    setTouch(!!isTouch);
-  }, []);
-  return touch;
-}
+function MagneticLink({ href, children, className = '', target, onClick }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 220, damping: 18, mass: 0.35 });
+  const springY = useSpring(y, { stiffness: 220, damping: 18, mass: 0.35 });
 
-/* -----------------------------
-   Motion presets
------------------------------ */
-const fadeUp = {
-  hidden: { opacity: 0, y: 14, filter: 'blur(10px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.65, ease: EASE } },
-};
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.09, delayChildren: 0.06 } },
-};
+  const move = (event) => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    x.set((event.clientX - rect.left - rect.width / 2) * 0.15);
+    y.set((event.clientY - rect.top - rect.height / 2) * 0.15);
+  };
 
-const hoverLift = {
-  rest: { y: 0, scale: 1 },
-  hover: { y: -3, scale: 1.01, transition: { duration: 0.25, ease: EASE } },
-  tap: { scale: 0.98, transition: { duration: 0.12, ease: EASE } },
-};
-
-/* -----------------------------
-   Background
------------------------------ */
-function BokehBackground() {
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 2200], [0, 120]);
-  const y2 = useTransform(scrollY, [0, 2200], [0, -90]);
-  const y3 = useTransform(scrollY, [0, 2200], [0, 70]);
+  const reset = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute inset-0 bg-[#fafafa]" />
-      <div className="absolute inset-0 opacity-[0.035] mix-blend-multiply [background-image:radial-gradient(rgba(0,0,0,0.35)_1px,transparent_1px)] [background-size:18px_18px]" />
-      <motion.div style={{ y: y1 }} className="absolute -left-24 top-28 h-72 w-72 rounded-full bg-black/[0.06] blur-3xl" />
-      <motion.div style={{ y: y2 }} className="absolute right-[-110px] top-10 h-80 w-80 rounded-full bg-black/[0.05] blur-3xl" />
-      <motion.div style={{ y: y3 }} className="absolute left-[35%] top-[55%] h-96 w-96 rounded-full bg-black/[0.04] blur-3xl" />
-      <div className="absolute left-[12%] top-[78%] h-64 w-64 rounded-full bg-black/[0.035] blur-3xl" />
-      <div className="absolute right-[18%] top-[72%] h-56 w-56 rounded-full bg-black/[0.03] blur-3xl" />
+    <motion.a
+      href={href}
+      target={target}
+      rel={target === '_blank' ? 'noreferrer' : undefined}
+      onClick={onClick}
+      onPointerMove={move}
+      onPointerLeave={reset}
+      style={{ x: springX, y: springY }}
+      whileTap={{ scale: 0.96 }}
+      className={className}
+    >
+      {children}
+    </motion.a>
+  );
+}
+
+function CursorAura() {
+  const reduced = useReducedMotion();
+  const x = useMotionValue(-200);
+  const y = useMotionValue(-200);
+  const springX = useSpring(x, { stiffness: 120, damping: 22, mass: 0.3 });
+  const springY = useSpring(y, { stiffness: 120, damping: 22, mass: 0.3 });
+
+  useEffect(() => {
+    if (reduced) return;
+    const move = (event) => {
+      x.set(event.clientX - 180);
+      y.set(event.clientY - 180);
+    };
+    window.addEventListener('pointermove', move, { passive: true });
+    return () => window.removeEventListener('pointermove', move);
+  }, [reduced, x, y]);
+
+  if (reduced) return null;
+  return <motion.div className="cursor-aura" style={{ x: springX, y: springY }} aria-hidden />;
+}
+
+function AmbientCanvas() {
+  const { scrollYProgress } = useScroll();
+  const yA = useTransform(scrollYProgress, [0, 1], ['0%', '48%']);
+  const yB = useTransform(scrollYProgress, [0, 1], ['0%', '-34%']);
+  const rotate = useTransform(scrollYProgress, [0, 1], [0, 55]);
+
+  return (
+    <div className="ambient-canvas" aria-hidden>
+      <motion.div className="ambient-orb ambient-orb-a" style={{ y: yA, rotate }} />
+      <motion.div className="ambient-orb ambient-orb-b" style={{ y: yB }} />
+      <div className="ambient-grid" />
+      <div className="noise" />
     </div>
   );
 }
 
-/* -----------------------------
-   UI atoms
------------------------------ */
-function Pill({ children }) {
+function Navigation() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <span className="inline-flex items-center rounded-full border border-black/10 bg-white/60 px-3 py-1 text-xs font-medium text-black/70 backdrop-blur">
-      {children}
-    </span>
+    <header className="site-nav">
+      <LogoMark />
+      <nav className="desktop-links" aria-label="Main navigation">
+        <a href="#practice">Practice</a>
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+      </nav>
+      <MagneticLink className="nav-contact" href="mailto:denzelnyatsanza@gmail.com?subject=Project%20Inquiry">
+        Start a project <Arrow diagonal />
+      </MagneticLink>
+      <button
+        type="button"
+        className="menu-toggle"
+        aria-expanded={open}
+        aria-label="Toggle menu"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span />
+        <span />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.nav
+            className="mobile-menu"
+            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={{ duration: 0.3, ease }}
+          >
+            {['practice', 'work', 'about', 'contact'].map((item) => (
+              <a key={item} href={`#${item}`} onClick={() => setOpen(false)}>
+                {item}
+              </a>
+            ))}
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }
 
-function GlassButton({ children, onClick, href, primary = false, className, ...rest }) {
-  const base = primary
-    ? 'bg-black text-white hover:bg-black/90'
-    : 'border border-black/10 bg-white/70 text-black/80 backdrop-blur hover:bg-white';
-
-  const common = cx(
-    'relative inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition',
-    base,
-    'shadow-[0_1px_0_rgba(0,0,0,0.05)]',
-    'hover:shadow-[0_16px_50px_rgba(0,0,0,0.12)]',
-    'focus:outline-none focus:ring-2 focus:ring-black/20',
-    className
-  );
-
-  if (href) {
-    return (
-      <motion.a
-        href={href}
-        className={common}
-        initial="rest"
-        whileHover="hover"
-        whileTap="tap"
-        variants={hoverLift}
-        {...rest}
-      >
-        {children}
-      </motion.a>
-    );
-  }
-
+function HeroWord({ children, className = '' }) {
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      className={common}
-      initial="rest"
-      whileHover="hover"
-      whileTap="tap"
-      variants={hoverLift}
-      {...rest}
+    <motion.span
+      className={`hero-word ${className}`}
+      whileHover={{ scaleX: 1.035, scaleY: 0.94, y: 3 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 14 }}
     >
       {children}
-    </motion.button>
+    </motion.span>
   );
 }
 
-/* -----------------------------
-   Modal
------------------------------ */
-function Modal({ open, onClose, item }) {
-  const panelRef = useRef(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (e) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (open) setTimeout(() => panelRef.current?.focus(), 0);
-  }, [open]);
-
-  if (!open || !item) return null;
+function Hero() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const imageY = useTransform(scrollYProgress, [0, 1], [0, 125]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, 58]);
+  const opacity = useTransform(scrollYProgress, [0, 0.82], [1, 0.25]);
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-[80] flex items-end justify-center px-4 py-6 sm:items-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        aria-modal="true"
-        role="dialog"
-      >
-        <button
-          type="button"
-          aria-label="Close modal"
-          onClick={onClose}
-          className="absolute inset-0 cursor-default bg-black/30 backdrop-blur-[6px]"
-        />
-
-        <motion.div
-          ref={panelRef}
-          tabIndex={-1}
-          initial={{ y: 16, opacity: 0, scale: 0.985 }}
-          animate={{ y: 0, opacity: 1, scale: 1, transition: { duration: 0.35, ease: EASE } }}
-          exit={{ y: 10, opacity: 0, transition: { duration: 0.2, ease: EASE } }}
-          className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-white/30 bg-white/70 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
+    <section className="hero" id="top" ref={ref}>
+      <motion.div className="hero-copy" style={{ y: textY, opacity }}>
+        <motion.p
+          className="eyebrow"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease }}
         >
-          <div className="flex items-center justify-between border-b border-black/10 px-5 py-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Pill>{item.year}</Pill>
-              <Pill>{item.category}</Pill>
-              <Pill>{item.org}</Pill>
-            </div>
-            <motion.button
-              type="button"
-              onClick={onClose}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
-              variants={hoverLift}
-              className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-xs font-medium text-black/70 backdrop-blur hover:bg-white"
-            >
-              Close
-            </motion.button>
-          </div>
-
-          {item.cover ? (
-            <div className="relative aspect-[16/9] w-full overflow-hidden">
-              <Image src={item.cover} alt={`${item.title} cover`} fill className="object-cover" sizes="100vw" />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/10" />
-            </div>
-          ) : (
-            <div className="relative h-44 w-full overflow-hidden bg-black/[0.03]">
-              <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] to-black/[0.06]" />
-              <div className="absolute left-6 top-6">
-                <Pill>No image</Pill>
-              </div>
-            </div>
-          )}
-
-          <div className="p-5 sm:p-7">
-            <h3 className="text-xl font-semibold tracking-[-0.03em] text-black sm:text-2xl">{item.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-black/70 sm:text-base">{item.detail}</p>
-
-            {!!item.impact?.length && (
-              <div className="mt-6">
-                <p className="mb-3 text-xs font-medium tracking-[0.18em] text-black/60">IMPACT</p>
-                <ul className="grid gap-2 text-sm leading-6 text-black/70 sm:grid-cols-2">
-                  {item.impact.map((x) => (
-                    <li key={x} className="flex gap-2">
-                      <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/30" />
-                      <span>{x}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {!!item.stack?.length && (
-              <div className="mt-6">
-                <p className="mb-3 text-xs font-medium tracking-[0.18em] text-black/60">STACK</p>
-                <div className="flex flex-wrap gap-2">
-                  {item.stack.map((s) => (
-                    <Pill key={s}>{s}</Pill>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {!!item.links?.length && (
-              <div className="mt-7 flex flex-wrap gap-2">
-                {item.links.map((l) => (
-                  <GlassButton key={l.href} href={l.href} target="_blank" rel="noreferrer">
-                    {l.label} ↗
-                  </GlassButton>
-                ))}
-              </div>
-            )}
+          Denzel Tinashe — designer, developer, creative director
+        </motion.p>
+        <h1>
+          <span className="hero-line"><HeroWord>Ministry.</HeroWord></span>
+          <span className="hero-line hero-line-shift"><HeroWord className="outline-word">Media.</HeroWord></span>
+          <span className="hero-line"><HeroWord>Web + mobile.</HeroWord></span>
+        </h1>
+        <motion.div
+          className="hero-lower"
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease }}
+        >
+          <p>
+            I build digital work that serves people, carries conviction, and feels impossible to ignore.
+          </p>
+          <div className="hero-actions">
+            <MagneticLink href="#work" className="blob-button blob-button-light">
+              Explore the work <Arrow />
+            </MagneticLink>
+            <a className="text-link" href="/resume.pdf">Resume <Arrow diagonal /></a>
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
-  );
-}
 
-/* -----------------------------
-   Work card
------------------------------ */
-function WorkCard({ item, onOpen }) {
-  return (
-    <motion.button
-      type="button"
-      onClick={() => onOpen(item)}
-      initial="rest"
-      whileHover="hover"
-      whileTap="tap"
-      variants={{
-        rest: { y: 0, scale: 1 },
-        hover: { y: -4, scale: 1.01, transition: { duration: 0.28, ease: EASE } },
-        tap: { scale: 0.985, transition: { duration: 0.12, ease: EASE } },
-      }}
-      className={cx(
-        'group relative flex w-full flex-col overflow-hidden rounded-2xl border border-black/10 bg-white/60 text-left backdrop-blur',
-        'shadow-[0_1px_0_rgba(0,0,0,0.04)]',
-        'hover:shadow-[0_24px_70px_rgba(0,0,0,0.14)] hover:border-black/15',
-        'focus:outline-none focus:ring-2 focus:ring-black/20'
-      )}
-    >
-      {item.cover ? (
-        <div className="relative aspect-[16/10] w-full overflow-hidden">
-          <motion.div
-            className="absolute inset-0"
-            variants={{
-              rest: { scale: 1 },
-              hover: { scale: 1.045, transition: { duration: 0.6, ease: EASE } },
-            }}
-          >
-            <Image src={item.cover} alt={item.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
-          </motion.div>
-
-          <motion.div
-            className="absolute inset-0"
-            variants={{
-              rest: { opacity: 0.6 },
-              hover: { opacity: 0.85, transition: { duration: 0.35, ease: EASE } },
-            }}
-            style={{
-              background:
-                'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.04) 65%, rgba(0,0,0,0.10) 100%)',
-            }}
+      <motion.div className="portrait-stage" style={{ y: imageY }}>
+        <div className="portrait-blob">
+          <div className="portrait-glow" />
+          <Image
+            src="/denzel.webp"
+            alt="Denzel Tinashe"
+            fill
+            priority
+            sizes="(max-width: 900px) 70vw, 36vw"
+            className="portrait-image"
           />
         </div>
-      ) : (
-        <div className="relative h-40 w-full overflow-hidden bg-black/[0.03]">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/[0.02] to-black/[0.06]" />
-          <div className="absolute left-4 top-4">
-            <Pill>No image</Pill>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Pill>{item.year}</Pill>
-          <Pill>{item.category}</Pill>
-        </div>
-
-        <div>
-          <h3 className="text-base font-semibold tracking-[-0.02em] text-black sm:text-lg">{item.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-black/70">{item.summary}</p>
-        </div>
-
-        <div className="mt-auto flex items-center justify-between pt-2">
-          <span className="text-xs font-medium text-black/60">Open</span>
-          <span className="text-xs font-medium text-black/60">↗</span>
-        </div>
-      </div>
-    </motion.button>
-  );
-}
-
-/* -----------------------------
-   Right Rail
------------------------------ */
-function RightRail({ sections, activeId, onJump, modalOpen }) {
-  const railRef = useRef(null);
-  const [expanded, setExpanded] = useState(true);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [nudgeKey, setNudgeKey] = useState(0);
-
-  const mvX = useMotionValue(0);
-  const mvY = useMotionValue(0);
-  const x = useSpring(mvX, { stiffness: 260, damping: 22, mass: 0.2 });
-  const y = useSpring(mvY, { stiffness: 260, damping: 22, mass: 0.2 });
-
-  const onMove = (e) => {
-    const el = railRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const dx = e.clientX - (r.left + r.width / 2);
-    const dy = e.clientY - (r.top + r.height / 2);
-    mvX.set(Math.max(-10, Math.min(10, dx * 0.05)));
-    mvY.set(Math.max(-10, Math.min(10, dy * 0.05)));
-  };
-
-  const markInteract = () => setHasInteracted(true);
-
-  useEffect(() => {
-    const t = setTimeout(() => setExpanded(false), 2400);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (hasInteracted || modalOpen) return;
-    const interval = setInterval(() => {
-      setExpanded(true);
-      setNudgeKey((k) => k + 1);
-      setTimeout(() => setExpanded(false), 2200);
-    }, 8500);
-    return () => clearInterval(interval);
-  }, [hasInteracted, modalOpen]);
-
-  return (
-    <motion.aside
-      ref={railRef}
-      onMouseMove={onMove}
-      onMouseEnter={() => {
-        markInteract();
-        setExpanded(true);
-      }}
-      onMouseLeave={() => {
-        mvX.set(0);
-        mvY.set(0);
-        if (hasInteracted) setExpanded(false);
-      }}
-      style={{ x, y }}
-      className="fixed right-4 top-1/2 z-[60] hidden -translate-y-1/2 sm:block"
-      aria-label="Section navigation"
-    >
-      <motion.div
-        key={nudgeKey}
-        initial={{ x: 0 }}
-        animate={!hasInteracted && !modalOpen ? { x: [0, -5, 5, -3, 3, 0] } : { x: 0 }}
-        transition={{ duration: 0.65, ease: EASE }}
-        className="rounded-2xl border border-black/10 bg-white/55 px-2 py-2 backdrop-blur-2xl shadow-[0_1px_0_rgba(0,0,0,0.05)]"
-      >
-        <div className="flex flex-col gap-1.5">
-          {sections.map((s) => {
-            const isActive = s.id === activeId;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => {
-                  markInteract();
-                  setExpanded(false);
-                  onJump(s.id);
-                }}
-                onFocus={() => {
-                  markInteract();
-                  setExpanded(true);
-                }}
-                className={cx(
-                  'group relative flex items-center gap-3 rounded-xl px-2 py-2 transition',
-                  'focus:outline-none focus:ring-2 focus:ring-black/20',
-                  isActive ? 'bg-black/[0.04]' : 'hover:bg-black/[0.03]'
-                )}
-                aria-label={`Go to ${s.label}`}
-              >
-                <span
-                  className={cx(
-                    'h-2.5 w-2.5 rounded-full transition-all duration-300',
-                    isActive ? 'bg-black/70 scale-110' : 'bg-black/20 group-hover:bg-black/35'
-                  )}
-                />
-                <AnimatePresence initial={false}>
-                  {expanded && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -6, filter: 'blur(6px)' }}
-                      animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                      exit={{ opacity: 0, x: -6, filter: 'blur(6px)' }}
-                      transition={{ duration: 0.25, ease: EASE }}
-                      className="whitespace-nowrap text-xs font-medium text-black/70"
-                    >
-                      {s.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </button>
-            );
-          })}
-        </div>
+        <motion.div
+          className="orbit-label orbit-label-one"
+          animate={{ y: [0, -10, 0], rotate: [-4, 2, -4] }}
+          transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          Jesus above all
+        </motion.div>
+        <motion.div
+          className="orbit-label orbit-label-two"
+          animate={{ y: [0, 12, 0], rotate: [4, -2, 4] }}
+          transition={{ duration: 6.4, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          Wichita, Kansas · available worldwide
+        </motion.div>
       </motion.div>
-    </motion.aside>
-  );
-}
 
-/* -----------------------------
-   Mobile chapter bar
------------------------------ */
-function MobileChapters({ sections, activeId, onJump }) {
-  return (
-    <div className="fixed bottom-4 left-1/2 z-[60] w-[min(92vw,520px)] -translate-x-1/2 sm:hidden">
-      <div className="rounded-2xl border border-black/10 bg-white/60 px-3 py-2 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-black/70">
-            {sections.find((s) => s.id === activeId)?.label ?? 'Chapter'}
-          </span>
-          <div className="flex items-center gap-1.5">
-            {sections.map((s) => {
-              const isActive = s.id === activeId;
-              return (
-                <button key={s.id} type="button" onClick={() => onJump(s.id)} className="p-1" aria-label={`Go to ${s.label}`}>
-                  <span className={cx('block h-2 w-2 rounded-full transition', isActive ? 'bg-black/70' : 'bg-black/20')} />
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      <div className="hero-index" aria-hidden>
+        <span>Scroll to enter</span>
+        <i />
       </div>
-    </div>
-  );
-}
-
-/* -----------------------------
-   Action Dock
------------------------------ */
-function ActionDock({ onWork, onEmail }) {
-  return (
-    <>
-      {/* desktop */}
-      <div className="fixed left-4 top-4 z-[60] hidden sm:block">
-        <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white/60 p-2 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-          <GlassButton href="/resume.pdf" className="rounded-xl px-3 py-2">
-            Resume ↗
-          </GlassButton>
-          <GlassButton onClick={onWork} className="rounded-xl px-3 py-2">
-            Work
-          </GlassButton>
-          <GlassButton primary onClick={onEmail} className="rounded-xl px-3 py-2">
-            Email
-          </GlassButton>
-        </div>
-      </div>
-
-      {/* mobile */}
-      <div className="fixed bottom-[72px] left-4 z-[60] sm:hidden">
-        <div className="flex items-center gap-2 rounded-2xl border border-black/10 bg-white/60 p-2 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.10)]">
-          <GlassButton href="/resume.pdf" className="rounded-xl px-3 py-2 text-xs">
-            Resume ↗
-          </GlassButton>
-          <GlassButton onClick={onWork} className="rounded-xl px-3 py-2 text-xs">
-            Work
-          </GlassButton>
-          <GlassButton primary onClick={onEmail} className="rounded-xl px-3 py-2 text-xs">
-            Email
-          </GlassButton>
-        </div>
-      </div>
-    </>
-  );
-}
-
-/* -----------------------------
-   Section wrapper (supports align)
------------------------------ */
-function PageSection({ id, children, className, align = 'center' }) {
-  return (
-    <section
-      id={id}
-      className={cx(
-        'snap-start min-h-[100svh] flex pt-24 pb-14',
-        align === 'start' ? 'items-start' : 'items-center',
-        className
-      )}
-    >
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">{children}</div>
     </section>
   );
 }
 
-/* -----------------------------
-   Helper: determine chapter by viewport center
------------------------------ */
-function getSectionAtViewportCenter(sections) {
-  const y = window.innerHeight * 0.5;
-  let bestId = sections[0]?.id ?? 'intro';
-  let bestDist = Infinity;
-
-  for (const s of sections) {
-    const el = document.getElementById(s.id);
-    if (!el) continue;
-    const r = el.getBoundingClientRect();
-    const center = r.top + r.height / 2;
-    const dist = Math.abs(center - y);
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestId = s.id;
-    }
-  }
-  return bestId;
+function Marquee() {
+  const content = 'MINISTRY  ✦  MEDIA  ✦  MOBILE APPS  ✦  WEB EXPERIENCES  ✦  CREATIVE DIRECTION  ✦  MOTION  ✦  ';
+  return (
+    <div className="marquee" aria-label="Selected capabilities">
+      <motion.div
+        className="marquee-track"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 24, repeat: Infinity, ease: 'linear' }}
+      >
+        <span>{content}</span>
+        <span>{content}</span>
+      </motion.div>
+    </div>
+  );
 }
 
-/* -----------------------------
-   Main Page
------------------------------ */
-export default function Page() {
-  const prefersReduced = usePrefersReducedMotion();
-  const isTouch = useIsTouchDevice();
-
-  const sections = useMemo(
-    () => [
-      { id: 'intro', label: 'Intro' },
-      { id: 'work', label: 'Work' },
-      { id: 'flagship', label: 'Flagship' },
-      { id: 'capabilities', label: 'Capabilities' },
-      { id: 'podcast', label: 'Podcast' },
-      { id: 'about', label: 'About' },
-      { id: 'contact', label: 'Contact' },
-    ],
-    []
-  );
-
-  const workItems = useMemo(
-    () => [
-      {
-        id: 'gocreate',
-        title: 'GoCreate / Wichita State ITS — Systems at Scale',
-        org: 'GoCreate • Wichita State University',
-        year: '2024–2025',
-        category: 'Systems • Infrastructure',
-        cover: '/work/gocreate-1.png',
-        priority: true,
-        summary:
-          'Digitized workflows, supported infrastructure initiatives, and contributed to operational integrations for a university-affiliated innovation space.',
-        detail:
-          'I worked across infrastructure, operations, and delivery—modernizing workflows and supporting systems used daily in a live environment. The focus was reliability, maintainability, and execution under real constraints.',
-        impact: [
-          'Converted legacy workflows into centralized digital processes',
-          'Supported membership/equipment operational integrations',
-          'Improved reliability through infrastructure support and upkeep',
-          'Reduced onboarding friction via clearer access and process flow',
-          'Delivered web/media updates with performance and SEO discipline',
-          'Operated cross-functionally across IT, operations, and users',
-        ],
-        stack: ['IT Ops', 'Systems Integration', 'Documentation', 'Web', 'Media', 'SEO'],
-        links: [
-          { label: 'GoCreate', href: 'https://gocreate.com/' },
-          { label: 'LinkedIn', href: 'https://www.linkedin.com/in/denzelnyatsanza/' },
-        ],
-      },
-      {
-        id: 'kdym',
-        title: 'KDYM — Branding & Media Systems',
-        org: 'Kansas District Youth Ministry',
-        year: '2024–2025',
-        category: 'Brand • Media',
-        cover: '/work/kdym-1.png',
-        summary:
-          'Brand-consistent creative delivery designed for clarity, repeatability, and marketing-aligned output across channels.',
-        detail:
-          'I built and delivered a repeatable visual system for fast content production while keeping messaging clean and immediately understood.',
-        impact: [
-          'Created repeatable creative patterns for fast turnaround',
-          'Improved brand clarity and consistency across campaigns',
-          'Optimized assets for platform-specific engagement',
-          'Supported outreach through disciplined visual delivery',
-        ],
-        stack: ['Branding', 'Editing', 'Motion', 'Creative Ops'],
-        links: [{ label: 'KDYM', href: 'https://kansasupci.org/programs/youth-ministry' }],
-      },
-      {
-        id: 'aftershock',
-        title: 'Aftershock Ministries — Website & UX',
-        org: 'Aftershock Ministries',
-        year: '2024–2025',
-        category: 'Web • UX',
-        cover: '/work/aftershock-1.png',
-        summary: 'A clean web presence built for speed, clarity, and discoverability—structured for trust and conversion.',
-        detail:
-          'I delivered a modern site experience emphasizing readability, performance, and a clear information hierarchy.',
-        impact: ['Improved content structure for scanning and clarity', 'SEO-aware implementation', 'Mobile-first UX and performance discipline'],
-        stack: ['Next.js/React', 'SEO', 'Performance', 'UI Systems'],
-        links: [{ label: 'Website', href: 'https://www.aftershockministries.com/' }],
-      },
-      {
-        id: 'fpc',
-        title: 'FPC Wichita — Creative Direction & Branding',
-        org: 'FPC Wichita',
-        year: '2024–2025',
-        category: 'Media • Brand',
-        cover: '/work/fpc-1.png',
-        summary: 'Brand-consistent visuals and media deliverables supporting events, messaging, and communication.',
-        detail:
-          'I produced creative assets with a system-first approach—consistent output under real timelines without losing clarity.',
-        impact: ['Strengthened consistency across outputs', 'Delivered event visuals under tight turnaround', 'Improved recognizability through disciplined execution'],
-        stack: ['Branding', 'Motion', 'Editing'],
-        links: [{ label: 'FPC Wichita', href: 'https://fpcwichita.org/' }],
-      },
-      {
-        id: 'hacia',
-        title: 'Hacia — Website Delivery',
-        org: 'Hacia',
-        year: '2024–2025',
-        category: 'Web • UI',
-        cover: '/work/hacia-1.png',
-        summary: 'A modern web build emphasizing clean structure, responsiveness, and a premium visual finish.',
-        detail:
-          'I delivered a structured site designed to communicate value quickly—responsive layout, clean UI, and maintainable structure.',
-        impact: ['Clear hierarchy and layout discipline', 'Responsive implementation', 'Polished details and micro-interactions'],
-        stack: ['React/Next', 'UI', 'Performance'],
-        links: [{ label: 'Website', href: 'https://hacia.co.zw/' }],
-      },
-      {
-        id: 'poscloud',
-        title: 'PosCloud — Full-Stack Delivery',
-        org: 'PosCloud',
-        year: '2022',
-        category: 'Backend • Frontend',
-        cover: null, // intentionally no image
-        summary: 'Backend work in PHP/Laravel with frontend delivery in React—built for practical product functionality.',
-        detail:
-          'I contributed across backend and frontend surfaces, applying OOP principles to produce maintainable, reliable implementation.',
-        impact: ['Delivered backend functionality in Laravel', 'Built frontend interfaces with React', 'Applied OOP patterns for maintainability'],
-        stack: ['PHP', 'Laravel', 'React', 'OOP'],
-        links: [],
-      },
-    ],
-    []
-  );
-
-  const [activeSection, setActiveSection] = useState('intro');
-
-  // Active section by intersection (rail highlight)
-  useEffect(() => {
-    const els = sections.map((s) => document.getElementById(s.id)).filter(Boolean);
-    if (!els.length) return;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0];
-        if (visible?.target?.id) setActiveSection(visible.target.id);
-      },
-      { threshold: [0.45, 0.6, 0.75] }
-    );
-
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, [sections]);
-
-  const jumpTo = useCallback((id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
-  // Modal
-  const [modalOpen, setModalOpen] = useState(false);
-  const [activeItem, setActiveItem] = useState(null);
-
-  const onOpen = (item) => {
-    setActiveItem(item);
-    setModalOpen(true);
-    document.body.style.overflow = 'hidden';
-  };
-  const onClose = () => {
-    setModalOpen(false);
-    setActiveItem(null);
-    document.body.style.overflow = '';
-  };
-
-  // Progress bar
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.2 });
-  const progressWidth = useTransform(progress, (v) => `${Math.max(0.02, v) * 100}%`);
-
-  // Work carousel ref
-  const workRailRef = useRef(null);
-
-  // Desktop pagination + Work gating (single source of truth)
-  const wheelLockRef = useRef(false);
-  const lastWheelAtRef = useRef(0);
-
-  useEffect(() => {
-    if (prefersReduced || isTouch || modalOpen) return;
-
-    const handler = (e) => {
-      const dy = e.deltaY;
-      if (Math.abs(dy) < 18) return;
-
-      const current = getSectionAtViewportCenter(sections);
-
-      // WORK GATE: always scroll carousel first (even if cursor is not over it)
-      if (current === 'work' && workRailRef.current) {
-        const el = workRailRef.current;
-        const atStart = el.scrollLeft <= 2;
-        const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
-
-        if ((dy > 0 && !atEnd) || (dy < 0 && !atStart)) {
-          e.preventDefault();
-          el.scrollLeft += dy * 1.25;
-          return;
-        }
-        // If at boundary, allow pagination below.
-      }
-
-      // Throttle
-      const now = Date.now();
-      if (wheelLockRef.current && now - lastWheelAtRef.current < 700) {
-        e.preventDefault();
-        return;
-      }
-      wheelLockRef.current = true;
-      lastWheelAtRef.current = now;
-
-      const idx = sections.findIndex((s) => s.id === current);
-      if (idx < 0) return;
-
-      const dir = dy > 0 ? 1 : -1;
-      const next = Math.max(0, Math.min(sections.length - 1, idx + dir));
-      if (next !== idx) {
-        e.preventDefault();
-        jumpTo(sections[next].id);
-      }
-
-      setTimeout(() => {
-        wheelLockRef.current = false;
-      }, 520);
-    };
-
-    window.addEventListener('wheel', handler, { passive: false });
-    return () => window.removeEventListener('wheel', handler);
-  }, [prefersReduced, isTouch, modalOpen, sections, jumpTo]);
+function PracticeCard({ item, index }) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const y = useTransform(scrollYProgress, [0, 1], [35, -35]);
 
   return (
-    <div className="min-h-screen text-black">
-      <BokehBackground />
-
-      {/* progress */}
-      <div className="fixed left-0 top-0 z-[70] h-[2px] w-full bg-black/5">
-        <motion.div className="h-full bg-black/40" style={{ width: progressWidth }} />
+    <motion.article
+      ref={ref}
+      className={`practice-card accent-${item.accent}`}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.75, delay: index * 0.08, ease }}
+      whileHover={{ borderRadius: '82px 34px 82px 34px', scale: 1.008 }}
+    >
+      <div className="practice-topline">
+        <span>{item.number}</span>
+        <span>{item.label}</span>
       </div>
+      <motion.div className="practice-symbol" style={{ y }} aria-hidden>
+        {item.number}
+      </motion.div>
+      <div className="practice-copy">
+        <h3>{item.title}</h3>
+        <p>{item.body}</p>
+      </div>
+      <div className="practice-proof">
+        {item.proof.map((proof) => <span key={proof}>{proof}</span>)}
+      </div>
+    </motion.article>
+  );
+}
 
-      <ActionDock onWork={() => jumpTo('work')} onEmail={() => jumpTo('contact')} />
-      <RightRail sections={sections} activeId={activeSection} onJump={jumpTo} modalOpen={modalOpen} />
-      <MobileChapters sections={sections} activeId={activeSection} onJump={jumpTo} />
+function ProjectArtwork({ project }) {
+  if (project.image) {
+    return (
+      <div className="project-image-wrap">
+        <Image src={project.image} alt="" fill sizes="(max-width: 900px) 100vw, 50vw" className="project-image" />
+      </div>
+    );
+  }
 
-      {/* snap tour */}
-      <main className="pt-0">
-        <div className="snap-y snap-mandatory scroll-smooth">
-          {/* INTRO */}
-          <PageSection id="intro">
-            <motion.div variants={stagger} initial="hidden" animate="show">
-              <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-                {/* Left */}
-                <div>
-                  <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">
-                    FAITH FIRST • EXECUTION ALWAYS
-                  </motion.p>
-
-                  <motion.h1 variants={fadeUp} className="mt-4 text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-                    Ambassador of Christ—building products, systems, and experiences with disciplined excellence.
-                  </motion.h1>
-
-                  <motion.p variants={fadeUp} className="mt-5 max-w-2xl text-pretty text-sm leading-6 text-black/70 sm:text-base">
-                    I’m Denzel Tinashe. I don’t hide my faith—yet I bring value through clarity, reliability, and outcomes. I design and
-                    engineer modern interfaces and operational systems across web, media, branding, and infrastructure-minded work.
-                  </motion.p>
-
-                  <motion.div variants={fadeUp} className="mt-7 flex flex-wrap items-center gap-3">
-                    <GlassButton primary onClick={() => jumpTo('work')}>Start the tour ↓</GlassButton>
-                    <GlassButton href="/resume.pdf">Download resume ↗</GlassButton>
-                    <GlassButton href="https://github.com/sparkdeveloping" target="_blank" rel="noreferrer">GitHub ↗</GlassButton>
-                  </motion.div>
-
-                  <motion.div variants={fadeUp} className="mt-10 max-w-[560px] rounded-2xl border border-black/10 bg-white/50 p-4 backdrop-blur sm:p-5">
-                    <p className="text-xs font-medium tracking-[0.18em] text-black/60">CREDIBILITY</p>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Pill>GoCreate</Pill>
-                      <Pill>Wichita State ITS</Pill>
-                      <Pill>KDYM</Pill>
-                      <Pill>FPC Wichita</Pill>
-                      <Pill>Aftershock</Pill>
-                      <Pill>Hacia</Pill>
-                      <Pill>PosCloud</Pill>
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Right (portrait stage) */}
-                <motion.div variants={fadeUp} className="relative">
-                  <div className="relative overflow-hidden rounded-[44px] border border-black/10 bg-white/55 backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.12)]">
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/0 to-white/60" />
-                    <div className="relative aspect-[4/5] w-full">
-                      <Image
-                        src="/denzel.png"
-                        alt="Denzel Tinashe"
-                        fill
-                        className="object-contain opacity-[0.96] mix-blend-multiply"
-                        sizes="(max-width: 1024px) 90vw, 520px"
-                        priority
-                      />
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/80 to-white/0" />
-                  </div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    transition={{ delay: 0.35, duration: 0.6, ease: EASE }}
-                    className="pointer-events-none absolute -left-6 top-10 hidden rounded-2xl border border-black/10 bg-white/60 px-4 py-3 text-xs font-semibold text-black/70 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,0.12)] lg:block"
-                  >
-                    Product • Engineering • Creative Tech
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    transition={{ delay: 0.48, duration: 0.6, ease: EASE }}
-                    className="pointer-events-none absolute -right-6 bottom-12 hidden rounded-2xl border border-black/10 bg-white/60 px-4 py-3 text-xs font-semibold text-black/70 backdrop-blur-2xl shadow-[0_18px_60px_rgba(0,0,0,0.12)] lg:block"
-                  >
-                    denzeltinashe.com
-                  </motion.div>
-                </motion.div>
-              </div>
-            </motion.div>
-          </PageSection>
-
-          {/* WORK (align start + padding so shadows don’t clip) */}
-          <PageSection id="work" align="start">
-            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.5 }}>
-              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">
-                SELECTED WORK
-              </motion.p>
-              <motion.h2 variants={fadeUp} className="mt-4 text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                Browse the work like a reel.
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-sm leading-6 text-black/70 sm:text-base">
-                Desktop: scroll wheel moves the carousel (gated). It will not paginate away until you reach the end.
-                Mobile: swipe horizontally.
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-7">
-                <div
-                  ref={workRailRef}
-                  className={cx(
-                    'relative -mx-5 sm:-mx-8 px-5 sm:px-8',
-                    'overflow-x-auto overflow-y-visible overscroll-x-contain',
-                    'snap-x snap-mandatory scroll-smooth',
-                    'py-10', // key: prevents hover shadows from clipping
-                    '[scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-                  )}
-                >
-                  <div className="flex gap-4 pr-6 sm:gap-5 sm:pr-10">
-                    {workItems.map((item) => (
-                      <div key={item.id} className="min-w-[86%] snap-start sm:min-w-[420px] lg:min-w-[460px]">
-                        <WorkCard item={item} onOpen={onOpen} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="text-xs text-black/50">←</span>
-                  <span className="text-xs text-black/50">→</span>
-                </div>
-              </motion.div>
-            </motion.div>
-          </PageSection>
-
-          {/* FLAGSHIP */}
-          <PageSection id="flagship">
-            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.5 }}>
-              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">FLAGSHIP</motion.p>
-              <motion.h2 variants={fadeUp} className="mt-4 text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                GoCreate / Wichita State ITS — Systems at scale.
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-sm leading-6 text-black/70 sm:text-base">
-                Digitization, integration, operational reliability, and delivery in a live environment—built to work daily.
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-7 grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-                <div className="relative overflow-hidden rounded-3xl border border-black/10 bg-white/60 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)]">
-                  <div className="relative aspect-[16/9] w-full overflow-hidden">
-                    <Image src="/work/gocreate-1.png" alt="GoCreate preview" fill className="object-cover" sizes="100vw" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/10" />
-                  </div>
-                  <div className="p-5 sm:p-7">
-                    <p className="text-xs font-medium tracking-[0.18em] text-black/60">KEY OUTCOMES</p>
-                    <div className="mt-4 grid gap-2 text-sm leading-6 text-black/70 sm:grid-cols-2">
-                      {workItems[0].impact.map((x) => (
-                        <div key={x} className="flex gap-2">
-                          <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/30" />
-                          <span>{x}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-7 flex flex-wrap gap-2">
-                      <GlassButton primary onClick={() => onOpen(workItems[0])}>Open full case</GlassButton>
-                      <GlassButton href="https://gocreate.com/" target="_blank" rel="noreferrer">Visit GoCreate ↗</GlassButton>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                  <p className="text-xs font-medium tracking-[0.18em] text-black/60">EXECUTION POSTURE</p>
-                  <p className="mt-4 text-sm leading-6 text-black/70 sm:text-base">
-                    Faith shapes my character and discipline; execution defines my work. Calm under responsibility. Consistent in delivery.
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    <Pill>Systems Thinking</Pill>
-                    <Pill>Reliability</Pill>
-                    <Pill>Design + Engineering</Pill>
-                    <Pill>Operational Discipline</Pill>
-                  </div>
-                  <div className="mt-8 rounded-2xl border border-black/10 bg-white/60 p-4 backdrop-blur">
-                    <p className="text-xs font-medium tracking-[0.18em] text-black/60">EDUCATION</p>
-                    <p className="mt-2 text-sm font-semibold tracking-[-0.02em]">Wichita State University</p>
-                    <p className="mt-1 text-sm text-black/70">Computer Engineering • Since 2022</p>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </PageSection>
-
-          {/* CAPABILITIES */}
-          <PageSection id="capabilities">
-            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.5 }}>
-              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">CAPABILITIES</motion.p>
-              <motion.h2 variants={fadeUp} className="mt-4 text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                Product clarity, engineering rigor, creative technology.
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-sm leading-6 text-black/70 sm:text-base">
-                The overlap matters: I can design it, build it, and deliver it with operational discipline.
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-7 grid gap-4 sm:grid-cols-3 sm:gap-5">
-                {[
-                  {
-                    title: 'Product Design',
-                    bullets: ['UI systems & design tokens', 'Interaction design with restraint', 'Hierarchy, clarity, trust', 'Prototyping & iteration'],
-                  },
-                  {
-                    title: 'Design Engineering',
-                    bullets: ['Next.js / React / Framer Motion', 'Performance discipline', 'Accessibility & structure', 'Maintainable component architecture'],
-                  },
-                  {
-                    title: 'Creative Technology',
-                    bullets: ['Editing, motion, logos, branding', 'Marketing-aligned creatives', 'SEO-aware delivery', 'Cross-platform consistency'],
-                  },
-                ].map((card) => (
-                  <motion.div
-                    key={card.title}
-                    initial="rest"
-                    whileHover="hover"
-                    whileTap="tap"
-                    variants={hoverLift}
-                    className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7"
-                  >
-                    <h3 className="text-lg font-semibold tracking-[-0.03em]">{card.title}</h3>
-                    <div className="mt-4 grid gap-2 text-sm leading-6 text-black/70">
-                      {card.bullets.map((b) => (
-                        <div key={b} className="flex gap-2">
-                          <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/30" />
-                          <span>{b}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="mt-6 rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                <p className="text-xs font-medium tracking-[0.18em] text-black/60">STACK</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {['Next.js', 'React', 'Framer Motion', 'Tailwind', 'Swift', 'Java', 'Python', 'PHP', 'Laravel', 'OOP', 'Frontend', 'Backend'].map((t) => (
-                    <Pill key={t}>{t}</Pill>
-                  ))}
-                </div>
-              </motion.div>
-            </motion.div>
-          </PageSection>
-
-          {/* PODCAST */}
-          <PageSection id="podcast">
-            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.5 }}>
-              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">PODCAST</motion.p>
-              <motion.h2 variants={fadeUp} className="mt-4 text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                Jesus Revealed Podcast
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-sm leading-6 text-black/70 sm:text-base">
-                Host, producer, and editor. Available on Spotify, Apple Podcasts, and YouTube as <span className="font-semibold">jesusrevealedpodcast</span>.
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-7 rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold tracking-[-0.02em] text-black">Host • Producer • Editor</p>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-black/70">
-                      This is part of my identity and story. Professionally, I’m execution-focused—reliable delivery, clear communication, and high standards.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <GlassButton primary href="https://www.youtube.com/@jesusrevealedpodcast" target="_blank" rel="noreferrer">
-                      YouTube ↗
-                    </GlassButton>
-                    <GlassButton href="https://open.spotify.com/" target="_blank" rel="noreferrer">
-                      Spotify ↗
-                    </GlassButton>
-                    <GlassButton href="https://podcasts.apple.com/" target="_blank" rel="noreferrer">
-                      Apple Podcasts ↗
-                    </GlassButton>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </PageSection>
-
-          {/* ABOUT */}
-          <PageSection id="about">
-            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.5 }}>
-              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">ABOUT</motion.p>
-              <motion.h2 variants={fadeUp} className="mt-4 text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                Conviction, discipline, and delivery.
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-sm leading-6 text-black/70 sm:text-base">
-                Faith first—then excellence. I show up, execute, and build systems and experiences that work in the real world.
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-7 grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
-                <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                  <p className="text-xs font-medium tracking-[0.18em] text-black/60">IDENTITY</p>
-                  <p className="mt-3 text-sm leading-6 text-black/70 sm:text-base">
-                    I’m an ambassador of Christ. That informs how I work: integrity, clarity, service, and disciplined excellence.
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    <Pill>Integrity</Pill>
-                    <Pill>Consistency</Pill>
-                    <Pill>Excellence</Pill>
-                    <Pill>Systems mindset</Pill>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                  <p className="text-xs font-medium tracking-[0.18em] text-black/60">SOCIAL</p>
-                  <p className="mt-3 text-sm leading-6 text-black/70 sm:text-base">
-                    Instagram & Facebook: <span className="font-semibold">@denzeltinashe</span>
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-2">
-                    <GlassButton href="https://instagram.com/denzeltinashe" target="_blank" rel="noreferrer">Instagram ↗</GlassButton>
-                    <GlassButton href="https://facebook.com/denzeltinashe" target="_blank" rel="noreferrer">Facebook ↗</GlassButton>
-                    <GlassButton href="https://www.linkedin.com/in/denzelnyatsanza/" target="_blank" rel="noreferrer">LinkedIn ↗</GlassButton>
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          </PageSection>
-
-          {/* CONTACT */}
-          <PageSection id="contact" className="pb-24">
-            <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.5 }}>
-              <motion.p variants={fadeUp} className="text-xs font-medium tracking-[0.18em] text-black/60">CONTACT</motion.p>
-              <motion.h2 variants={fadeUp} className="mt-4 text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-4xl">
-                Let’s build something clean, reliable, and high-impact.
-              </motion.h2>
-              <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-sm leading-6 text-black/70 sm:text-base">
-                Portfolio: <span className="font-semibold">denzeltinashe.com</span>. Email is best. Resume download is available.
-              </motion.p>
-
-              <motion.div variants={fadeUp} className="mt-7 grid gap-5 lg:grid-cols-2">
-                <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                  <p className="text-sm font-semibold tracking-[-0.02em]">Primary</p>
-                  {/* <p className="mt-2 text-sm leading-6 text-black/70">Replace the email below with your real email.</p> */}
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <GlassButton primary href="mailto:denzelnyatsanza@gmail.com?subject=Project%20Inquiry%20—%20Denzel%20">Email Me</GlassButton>
-                    <GlassButton href="/resume.pdf">Download Resume ↗</GlassButton>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur shadow-[0_18px_60px_rgba(0,0,0,0.10)] sm:p-7">
-                  <p className="text-sm font-semibold tracking-[-0.02em]">Quick Message</p>
-                  {/* <p className="mt-2 text-sm leading-6 text-black/70">Wire to your backend or a form service later.</p> */}
-
-                  <form className="mt-5 grid gap-3">
-                    <input className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-black placeholder:text-black/40 outline-none backdrop-blur focus:ring-2 focus:ring-black/15" placeholder="Name" />
-                    <input className="w-full rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-black placeholder:text-black/40 outline-none backdrop-blur focus:ring-2 focus:ring-black/15" placeholder="Email" />
-                    <textarea rows={4} className="w-full resize-none rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-black placeholder:text-black/40 outline-none backdrop-blur focus:ring-2 focus:ring-black/15" placeholder="Message" />
-                    <motion.button
-                      type="button"
-                      initial="rest"
-                      whileHover="hover"
-                      whileTap="tap"
-                      variants={hoverLift}
-                      className="rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_60px_rgba(0,0,0,0.16)] hover:bg-black/90"
-                    >
-                      Send (connect later)
-                    </motion.button>
-                  </form>
-                </div>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="mt-10 flex flex-col gap-2 text-xs text-black/50 sm:flex-row sm:items-center sm:justify-between">
-                <p>© {new Date().getFullYear()} Denzel Tinashe. All rights reserved.</p>
-                <p className="flex flex-wrap gap-3">
-                  {sections.map((s) => (
-                    <button key={s.id} onClick={() => jumpTo(s.id)} className="hover:text-black">
-                      {s.label}
-                    </button>
-                  ))}
-                </p>
-              </motion.div>
-            </motion.div>
-          </PageSection>
+  if (project.art === 'meal') {
+    return (
+      <div className="art art-meal" aria-hidden>
+        <div className="meal-orbit meal-orbit-one" />
+        <div className="meal-orbit meal-orbit-two" />
+        <div className="phone phone-light">
+          <div className="phone-bar"><b>MEAL RECAP</b><span>•••</span></div>
+          <div className="meal-date">TODAY · JUN 12</div>
+          <strong>1,722</strong>
+          <small>of 2,200 calories</small>
+          <div className="macro-row"><span>85 P</span><span>137 C</span><span>77 F</span></div>
+          <div className="meal-card"><b>Rice and chicken</b><span>370 cal</span></div>
+          <div className="meal-input">What did you eat? <i>✦</i></div>
         </div>
-      </main>
+        <span className="art-caption">AI food logging without the busywork.</span>
+      </div>
+    );
+  }
 
-      <Modal open={modalOpen} onClose={onClose} item={activeItem} />
+  if (project.art === 'flame') {
+    return (
+      <div className="art art-flame" aria-hidden>
+        <div className="scripture-ring" />
+        <div className="phone phone-dark">
+          <div className="phone-bar"><b>BeforeUScroll</b><span>12:41</span></div>
+          <div className="flame-shape"><span>✦</span></div>
+          <strong>42 min</strong>
+          <small>intentional time remaining</small>
+          <div className="scripture-card">“Set your affection on things above...”<b>Colossians 3:2</b></div>
+        </div>
+        <span className="art-caption">Scripture before the scroll.</span>
+      </div>
+    );
+  }
+
+  if (project.art === 'podcast') {
+    return (
+      <div className="art art-podcast" aria-hidden>
+        <div className="podcast-disc"><span>JR</span></div>
+        <div className="podcast-wave">
+          {Array.from({ length: 28 }, (_, index) => <i key={index} />)}
+        </div>
+        <div className="podcast-copy">
+          <small>JESUS REVEALED</small>
+          <b>Listen.<br />Remember.<br />Respond.</b>
+        </div>
+      </div>
+    );
+  }
+
+  if (project.art === 'outpour') {
+    return (
+      <div className="art art-outpour" aria-hidden>
+        <div className="outpour-lines">
+          <span>OUTPOUR</span><span>OUTPOUR</span><span>OUTPOUR</span><span>OUTPOUR</span>
+        </div>
+        <div className="outpour-center">
+          <small>2026 DISTRICT THEME</small>
+          <b>JOEL 2:28</b>
+          <p>I will pour out my spirit upon all flesh.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="art art-code" aria-hidden>
+      <div className="code-window">
+        <span className="window-dots">● ● ●</span>
+        <pre>{`const build = async () => {\n  servePeople();\n  shipWithExcellence();\n  return impact;\n};`}</pre>
+      </div>
+      <div className="code-bubble">Laravel × React</div>
     </div>
+  );
+}
+
+function ProjectCard({ project, index }) {
+  return (
+    <motion.a
+      layout
+      href={project.href}
+      target="_blank"
+      rel="noreferrer"
+      className={`project-card project-${project.id} ${project.featured ? 'project-featured' : ''}`}
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ duration: 0.6, delay: Math.min(index * 0.05, 0.2), ease }}
+      whileHover={{ y: -8 }}
+    >
+      <div className="project-art-shell">
+        <ProjectArtwork project={project} />
+        <div className="project-open">↗</div>
+      </div>
+      <div className="project-meta">
+        <div>
+          <p>{project.type}</p>
+          <h3>{project.name}</h3>
+        </div>
+        <span>{project.year}</span>
+      </div>
+      <p className="project-description">{project.description}</p>
+    </motion.a>
+  );
+}
+
+function WorkSection() {
+  const [filter, setFilter] = useState('all');
+  const filtered = useMemo(
+    () => (filter === 'all' ? projects : projects.filter((project) => project.tags.includes(filter))),
+    [filter]
+  );
+
+  return (
+    <section className="work-section section-shell" id="work">
+      <div className="section-heading">
+        <p className="eyebrow">Selected work · built and shipped</p>
+        <h2>Proof, not promises.</h2>
+        <p className="section-intro">
+          Products, ministry platforms, media systems, and operational tools—each built around a real audience and a real outcome.
+        </p>
+      </div>
+      <div className="filters" role="group" aria-label="Filter projects">
+        {[
+          ['all', 'All work'],
+          ['ministry', 'Ministry'],
+          ['media', 'Media'],
+          ['products', 'Web / mobile'],
+        ].map(([value, label]) => (
+          <button
+            type="button"
+            key={value}
+            className={filter === value ? 'active' : ''}
+            onClick={() => setFilter(value)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <motion.div layout className="project-grid">
+        <AnimatePresence mode="popLayout">
+          {filtered.map((project, index) => (
+            <ProjectCard project={project} index={index} key={project.id} />
+          ))}
+        </AnimatePresence>
+      </motion.div>
+    </section>
+  );
+}
+
+function AboutSection() {
+  return (
+    <section className="about-section section-shell" id="about">
+      <div className="about-grid">
+        <div className="about-sticky">
+          <p className="eyebrow">How I work</p>
+          <h2>Faith first. Then disciplined excellence.</h2>
+          <MagneticLink
+            href="mailto:denzelnyatsanza@gmail.com?subject=Project%20Inquiry"
+            className="blob-button blob-button-dark"
+          >
+            Build with me <Arrow />
+          </MagneticLink>
+        </div>
+        <div className="about-copy">
+          <p className="about-lead">
+            I am an ambassador of Christ, a designer, a developer, and a creative technologist. I care about the message, the people receiving it, and the quality of the system carrying it.
+          </p>
+          <p>
+            My strongest work happens where ministry, communication, and technology overlap: a mobile product that protects attention, a youth ministry platform that feels alive, a church media system that stays consistent, or a product experience that makes a complex task feel simple.
+          </p>
+          <div className="capability-cloud">
+            {capabilities.map((capability, index) => (
+              <motion.span
+                key={capability}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.035, type: 'spring', stiffness: 220, damping: 18 }}
+                whileHover={{ scale: 1.08, rotate: index % 2 ? 2 : -2 }}
+              >
+                {capability}
+              </motion.span>
+            ))}
+          </div>
+          <div className="principles">
+            <article><span>01</span><h3>Clarity before decoration</h3><p>The experience must explain itself, even when the visual language is unusual.</p></article>
+            <article><span>02</span><h3>Motion with purpose</h3><p>Every animation should guide attention, reveal structure, or make interaction feel more human.</p></article>
+            <article><span>03</span><h3>Systems over one-offs</h3><p>Designs are built to survive campaigns, content changes, and the next person who needs to use them.</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ContactSection() {
+  return (
+    <footer className="contact-section" id="contact">
+      <div className="contact-orb" aria-hidden />
+      <p className="eyebrow">Have a ministry, media, web, or app project?</p>
+      <h2>Let’s make it<br /><span>impossible to ignore.</span></h2>
+      <MagneticLink
+        href="mailto:denzelnyatsanza@gmail.com?subject=Project%20Inquiry%20—%20Denzel%20Tinashe"
+        className="contact-email"
+      >
+        denzelnyatsanza@gmail.com <Arrow diagonal />
+      </MagneticLink>
+      <div className="footer-row">
+        <span>© {new Date().getFullYear()} Denzel Tinashe</span>
+        <div>
+          <a href="https://instagram.com/denzeltinashe" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="https://www.linkedin.com/in/denzelnyatsanza/" target="_blank" rel="noreferrer">LinkedIn</a>
+          <a href="https://github.com/sparkdeveloping" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://www.youtube.com/@jesusrevealedpodcast" target="_blank" rel="noreferrer">Podcast</a>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default function Page() {
+  return (
+    <MotionConfig reducedMotion="user">
+      <main>
+        <AmbientCanvas />
+        <CursorAura />
+        <Navigation />
+        <Hero />
+        <Marquee />
+        <section className="practice-section section-shell" id="practice">
+          <div className="section-heading practice-heading">
+            <p className="eyebrow">Three focused practices</p>
+            <h2>One standard of excellence.</h2>
+          </div>
+          <div className="practice-stack">
+            {practices.map((item, index) => <PracticeCard item={item} index={index} key={item.id} />)}
+          </div>
+        </section>
+        <WorkSection />
+        <AboutSection />
+        <ContactSection />
+      </main>
+    </MotionConfig>
   );
 }
