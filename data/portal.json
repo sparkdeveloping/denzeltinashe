@@ -1,0 +1,377 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-09T16:00:00.000Z",
+  "clients": [
+    {
+      "id": "client-quarter-athletic",
+      "slug": "quarter-athletic",
+      "shortCode": "qa",
+      "name": "Quarter Athletic",
+      "projectName": "Management Platform",
+      "projectType": "Internal Operations Platform",
+      "status": "Discovery / MVP Definition",
+      "stage": "discovery",
+      "accent": "lime",
+      "summary": "Centralize Quarter Athletic's operational workflow so leadership can see what is happening, who is responsible, what happens next, and what is stuck.",
+      "facts": {
+        "employees": "~52",
+        "teams": "~200",
+        "founded": "~2022",
+        "leadership": "President + Vice President",
+        "currentProcess": "Pen, paper, leadership memory, verbal communication and disconnected files"
+      },
+      "objective": "Define and build an MVP that centralizes the workflow from customer/project intake through design, financial processing, production, quality assurance, packaging and shipping.",
+      "principles": [
+        "What is happening?",
+        "Who is responsible?",
+        "What happens next?",
+        "Is anything stuck?"
+      ],
+      "workflow": [
+        "Customer / Team",
+        "Meeting",
+        "Project Created",
+        "Mockup / Design",
+        "Customer Approval",
+        "Quote",
+        "Invoice",
+        "Payment Status",
+        "Production Queue",
+        "Production",
+        "Quality Assurance",
+        "Packaging",
+        "Shipping",
+        "Delivered",
+        "Complete"
+      ],
+      "progress": [
+        {
+          "label": "Discovery",
+          "value": 80
+        },
+        {
+          "label": "Requirements",
+          "value": 60
+        },
+        {
+          "label": "Design",
+          "value": 15
+        },
+        {
+          "label": "Development",
+          "value": 0
+        }
+      ],
+      "nextActions": [
+        "Walk through one real completed Quarter Athletic order end-to-end",
+        "Confirm the actual production stages and handoffs",
+        "Confirm employee departments, roles and access needs",
+        "Document the current quoting, invoicing and payment process",
+        "Confirm MVP scope before production development begins"
+      ],
+      "originalMeeting": {
+        "title": "Initial Discovery Meeting",
+        "image": "/api/portal/file/quarter-athletic/original-meeting-notes.png",
+        "transcription": [
+          "Leadership needs visibility into everything being done.",
+          "Company tracker / project tracking.",
+          "Project: meetings.",
+          "Project: mockups; customer chooses what they like / what is good to go.",
+          "There is always a point of contact.",
+          "Project: quote.",
+          "Project: invoice.",
+          "Project: production team.",
+          "Marketing: campaigns and design.",
+          "Production: manager, approximately 52 people, quality assurance and producing.",
+          "Shipping: processing and putting products in nice bags.",
+          "Right-side notes reference three divisions and additional ideas that still need confirmation."
+        ],
+        "confirmedStatements": [
+          "The president and vice president currently carry a large amount of operational knowledge themselves.",
+          "Pen and paper are still part of the current management process.",
+          "A clear point of contact is important in the workflow.",
+          "The operation includes design/mockups, quotes/invoices, production, QA, packaging and shipping."
+        ],
+        "interpretation": "The core need is not simply task management. Quarter Athletic needs an internal operating system that converts leadership memory and paper-based coordination into visible, trackable company knowledge.",
+        "uncertainNotes": [
+          "Exact meaning of the handwritten '3 divisions' note.",
+          "A possible recruiting-platform reference on the right side of the page.",
+          "Any external website or division name written in the lower-right area."
+        ]
+      },
+      "deepDiveQuestions": {
+        "Customer process": [
+          "How does a new team/customer enter Quarter Athletic?",
+          "Who normally handles the first meeting?",
+          "When does an opportunity officially become a project/order?"
+        ],
+        "Products": [
+          "How are products, sizes, colors and options represented today?",
+          "Can one project contain several product types and size breakdowns?",
+          "Is inventory tracked anywhere today?"
+        ],
+        "Mockups": [
+          "Who creates mockups and where are source files stored?",
+          "How are mockups sent to customers and how is approval captured?",
+          "How many revisions are typical and what happens after approval?"
+        ],
+        "Quotes and invoices": [
+          "Who creates quotes and how is pricing calculated?",
+          "Are deposits required or is full payment required before production?",
+          "What software currently creates invoices and records payments?"
+        ],
+        "Production": [
+          "What are the actual production stages from approved order to finished product?",
+          "How is work assigned across the production staff?",
+          "Do different product types follow different production workflows?"
+        ],
+        "Quality assurance": [
+          "What exactly constitutes a QA pass?",
+          "Does every item get inspected or is sampling used?",
+          "What happens to failed items and who approves rework?"
+        ],
+        "Shipping": [
+          "Which carriers are used and how are labels generated?",
+          "Can a project ship in multiple packages or partial shipments?",
+          "How is delivery confirmation handled today?"
+        ],
+        "Employees and access": [
+          "What departments currently exist?",
+          "Which employees actually need platform access?",
+          "What information should each role be allowed to see or change?"
+        ]
+      },
+      "meetings": [
+        {
+          "id": "meeting-001",
+          "title": "Initial Discovery Meeting",
+          "date": "2026-08-31",
+          "attendees": "Quarter Athletic President, Denzel",
+          "summary": "Initial discussion of the management problem, current paper/memory workflow and the desire for a centralized company tracker.",
+          "decisions": "Proceed with deeper discovery before finalizing the build scope and pricing.",
+          "followUp": "Run a detailed workflow session with leadership using one real order as the example.",
+          "visibility": "client"
+        }
+      ],
+      "requirements": [
+        {
+          "id": "QA-REQ-001",
+          "title": "Project ownership",
+          "description": "Every active project must have a clearly identified Quarter Athletic owner and a customer/team point of contact.",
+          "status": "confirmed",
+          "priority": "critical",
+          "source": "Initial discovery meeting",
+          "visibility": "client"
+        },
+        {
+          "id": "QA-REQ-002",
+          "title": "Leadership visibility",
+          "description": "Leadership must be able to see active work, ownership, current stage, deadlines and blockers without relying on memory.",
+          "status": "confirmed",
+          "priority": "critical",
+          "source": "Initial discovery meeting",
+          "visibility": "client"
+        },
+        {
+          "id": "QA-REQ-003",
+          "title": "Mockup version tracking",
+          "description": "The system should maintain mockup/design versions and indicate customer feedback and the final approved version.",
+          "status": "proposed",
+          "priority": "high",
+          "source": "Discovery interpretation",
+          "visibility": "client"
+        },
+        {
+          "id": "QA-REQ-004",
+          "title": "Operational finance tracking",
+          "description": "Projects should connect to quotes, invoices, balances and payment status without attempting to replace full accounting in the MVP.",
+          "status": "proposed",
+          "priority": "high",
+          "source": "Discovery interpretation",
+          "visibility": "client"
+        },
+        {
+          "id": "QA-REQ-005",
+          "title": "Production queue",
+          "description": "Approved work should enter a visible production queue with responsibility, priority, quantity, due date and status.",
+          "status": "proposed",
+          "priority": "critical",
+          "source": "Initial discovery meeting",
+          "visibility": "client"
+        },
+        {
+          "id": "QA-REQ-006",
+          "title": "QA gate before shipping",
+          "description": "Production work should record QA pass/fail and required rework before an order is allowed to move to shipping.",
+          "status": "proposed",
+          "priority": "high",
+          "source": "Initial discovery meeting",
+          "visibility": "client"
+        },
+        {
+          "id": "QA-REQ-007",
+          "title": "Activity history",
+          "description": "Significant project changes should create a permanent activity trail so company knowledge no longer lives only in individual memory.",
+          "status": "proposed",
+          "priority": "critical",
+          "source": "Discovery interpretation",
+          "visibility": "client"
+        }
+      ],
+      "mvp": {
+        "included": [
+          "Authentication",
+          "Employee accounts and role-based permissions",
+          "Executive dashboard",
+          "Customer/team database and contacts",
+          "Project management and ownership",
+          "Tasks and assignments",
+          "Project stages",
+          "Mockup version and approval tracking",
+          "Quotes",
+          "Invoice and payment-status tracking",
+          "Production queue and assignments",
+          "Quality assurance pass/fail and rework",
+          "Packaging and shipping status",
+          "Files and project attachments",
+          "Notes/comments",
+          "Activity history",
+          "Basic notifications",
+          "Lightweight marketing campaign tracking"
+        ],
+        "deferred": [
+          "Payroll and benefits",
+          "Full accounting replacement",
+          "Advanced inventory optimization",
+          "QuickBooks or accounting integrations",
+          "Shopify integration",
+          "Customer self-service portal",
+          "Automated customer approval links",
+          "E-signatures",
+          "UPS/FedEx carrier integrations",
+          "Barcode scanning",
+          "Advanced manufacturing resource planning",
+          "Capacity forecasting",
+          "Advanced analytics builder",
+          "Marketing automation",
+          "Full HRIS",
+          "Native mobile application"
+        ],
+        "timeline": [
+          {
+            "phase": "Discovery & workflow validation",
+            "duration": "1\u20132 weeks"
+          },
+          {
+            "phase": "Architecture & interface planning",
+            "duration": "1\u20132 weeks"
+          },
+          {
+            "phase": "Core platform",
+            "duration": "3\u20134 weeks"
+          },
+          {
+            "phase": "Production / QA / shipping",
+            "duration": "2\u20133 weeks"
+          },
+          {
+            "phase": "Testing, revisions & onboarding",
+            "duration": "1\u20132 weeks"
+          }
+        ],
+        "target": "Preliminary MVP target: approximately 8\u201312 weeks, subject to workflow validation."
+      },
+      "tasks": [
+        {
+          "id": "task-001",
+          "title": "Walk through one completed order",
+          "status": "waiting",
+          "type": "Discovery",
+          "owner": "Quarter Athletic + Denzel",
+          "due": "",
+          "visibility": "client"
+        },
+        {
+          "id": "task-002",
+          "title": "Confirm production workflow stages",
+          "status": "todo",
+          "type": "Discovery",
+          "owner": "Denzel",
+          "due": "",
+          "visibility": "client"
+        },
+        {
+          "id": "task-003",
+          "title": "Confirm departments and user roles",
+          "status": "todo",
+          "type": "Requirements",
+          "owner": "Quarter Athletic",
+          "due": "",
+          "visibility": "client"
+        },
+        {
+          "id": "task-004",
+          "title": "Design executive dashboard structure",
+          "status": "todo",
+          "type": "Design",
+          "owner": "Denzel",
+          "due": "",
+          "visibility": "internal"
+        },
+        {
+          "id": "task-005",
+          "title": "Finalize MVP specification and milestone pricing",
+          "status": "todo",
+          "type": "Commercial",
+          "owner": "Denzel",
+          "due": "",
+          "visibility": "internal"
+        }
+      ],
+      "documents": [
+        {
+          "id": "doc-001",
+          "title": "Original Meeting Notes",
+          "category": "Discovery",
+          "url": "/api/portal/file/quarter-athletic/original-meeting-notes.png",
+          "note": "Photograph of handwritten notes from the initial discovery meeting.",
+          "visibility": "client"
+        }
+      ],
+      "financials": {
+        "visibility": "internal",
+        "estimateStatus": "Not final \u2014 complete workflow validation before quoting.",
+        "workingRange": "$25,000\u2013$45,000 MVP value range",
+        "maintenanceRange": "$1,500\u2013$5,000/month depending on support, hosting, integrations and service level",
+        "notes": [
+          "Do not present the working range as a final quote until the real-order workflow deep dive is complete.",
+          "Use milestones and a phased scope to keep the initial commitment controlled.",
+          "Advanced accounting, inventory, integrations, customer portal and manufacturing automation materially change scope."
+        ]
+      },
+      "activity": [
+        {
+          "id": "activity-001",
+          "date": "2026-08-31T18:00:00.000Z",
+          "text": "Initial management-platform discovery meeting completed.",
+          "type": "meeting",
+          "visibility": "client"
+        },
+        {
+          "id": "activity-002",
+          "date": "2026-09-09T15:00:00.000Z",
+          "text": "Initial handwritten notes were converted into a structured MVP discovery plan.",
+          "type": "discovery",
+          "visibility": "client"
+        },
+        {
+          "id": "activity-003",
+          "date": "2026-09-09T16:00:00.000Z",
+          "text": "Quarter Athletic workspace created inside the Denzel Tinashe client portal.",
+          "type": "system",
+          "visibility": "internal"
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,28 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  outputFileTracingIncludes: {
+    '/api/portal/file/*': ['./data/files/**/*'],
+    '/clients/*': ['./data/portal.json'],
+  },
   async headers() {
     return [
       {
         source: '/gabby',
         headers: [
           { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, noimageindex' },
+        ],
+      },
+      {
+        source: '/clients/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, noimageindex' },
+        ],
+      },
+      {
+        source: '/api/portal/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, noimageindex' },
+          { key: 'Cache-Control', value: 'private, no-store' },
         ],
       },
       {

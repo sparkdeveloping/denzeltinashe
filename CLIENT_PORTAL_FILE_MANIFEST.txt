@@ -1,0 +1,32 @@
+CLIENT PORTAL — NEW / MODIFIED FILES
+
+NEW
+.env.example
+CLIENT_PORTAL_SETUP.md
+CLIENT_PORTAL_FILE_MANIFEST.txt
+proxy.js
+app/clients/layout.js
+app/clients/page.js
+app/clients/login/page.js
+app/clients/[slug]/page.js
+app/clients/[slug]/[section]/page.js
+app/api/portal/login/route.js
+app/api/portal/logout/route.js
+app/api/portal/item/route.js
+app/api/portal/client/route.js
+app/api/portal/file/[...path]/route.js
+components/portal/ClientWorkspace.js
+components/portal/LoginForm.js
+components/portal/PortalActions.js
+components/portal/PortalShell.js
+components/portal/portal.module.css
+lib/portal/auth.js
+lib/portal/format.js
+lib/portal/store.js
+data/portal.json
+data/files/quarter-athletic/original-meeting-notes.png
+
+MODIFIED
+next.config.mjs
+
+EXISTING SITE FILES ARE OTHERWISE PRESERVED.
