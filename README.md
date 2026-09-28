@@ -1,68 +1,61 @@
-# Denzel Tinashe — Product Portfolio
+# Denzel Tinashe Portfolio — Audited V2.3
 
-A product-focused Next.js portfolio for Denzel Tinashe, centered on mobile apps, web apps, and websites.
+# Denzel Tinashe Portfolio — Benchmark V2
+
+A product-first portfolio for Denzel Tinashe, rebuilt after a competitive audit of Apple design guidance, former Apple product/design portfolios, independent app builders, hiring-side portfolio research, YouTube portfolio reviews, and the connected `sparkdeveloping` GitHub account.
 
 ## Positioning
 
-The main domain is intentionally focused on product design and development. Media and ministry are routed to dedicated subdomains so the primary portfolio remains clear for people looking to hire Denzel to design and build software.
+**Product designer + engineer for native iOS apps, full-stack web products, and high-conviction websites.**
+
+The site is designed for founders, operators, teams, and hiring decision-makers who need evidence that Denzel can reason about a product and build it—not only style it.
 
 ## Featured work
 
 - MealRecap
+- Spotly
+- GoCreate Insights
 - BeforeUScroll
+
+Alayna and Lexi are intentionally excluded.
+
+## Deployed website proof
+
+The supporting website section now explicitly includes:
+
+- FPC Wichita — `fpcwichita.vercel.app`
+- St. Mark Cathedral COGIC — `smccogic.vercel.app`
+- POM Church — `pomchurch.vercel.app`
+- Oil City Church — `oilcitychurch.vercel.app`
+- Calvary Apostolic Church — `calvaryapostolicchurch.vercel.app`
 - KDYM
 - HACIA
 - Aftershock
-- GoCreate / Wichita State ITS
 
-A compact archive links to additional work and the broader GitHub profile.
+Where a public `sparkdeveloping` repository is available, the site exposes a separate **Source** link next to the live deployment.
 
-## Visual system
 
-- monochrome product aesthetic
-- responsive oversized typography
-- elastic / rubber geometry
-- spring-based interactions
-- glass navigation
-- grayscale-to-color project imagery
-- device-based app compositions
-- native scrolling
-- reduced-motion support
-
-## Run locally
+## Run
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open `http://localhost:3000`.
-
-## Build
+Production validation:
 
 ```bash
 npm run build
-npm run start
+npm start
 ```
 
-## Important files
+## Important supporting documents
 
-- `app/page.js` — redesigned public homepage
-- `app/globals.css` — visual system and responsive behavior
-- `app/layout.js` — SEO and social metadata
-- `public/portrait-2026.webp` — optimized headshot extracted from the supplied RAW file
-- `PORTFOLIO_AUDIT_2026.md` — full audit and rationale
-- `REDESIGN_NOTES.md` — implementation notes
+- `COMPETITIVE_AUDIT_2026.md` — external benchmark, GitHub audit, strategy, QA status.
+- `V2_IMPLEMENTATION_NOTES.md` — implementation summary.
+- `CLIENT_PORTAL_SETUP.md` — existing client portal documentation.
+- `CLIENT_GALLERY_AUDIT.md` — existing gallery/client asset notes.
 
 ## Existing routes preserved
 
-The redesign does not remove the existing client portal, API routes, or gallery routes contained in this project.
-
-## Subdomains
-
-The main portfolio links out to:
-
-- `media.denzeltinashe.com`
-- `ministry.denzeltinashe.com`
-
-Those subdomains must be configured at the hosting / DNS layer to resolve to their respective projects.
+The redesign intentionally leaves the supplied client portal, API route tree, client galleries, and Gabby gallery intact. Homepage and portfolio case-study styling are scoped separately to reduce regression risk.

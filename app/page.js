@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import {
   AnimatePresence,
   MotionConfig,
@@ -12,143 +13,75 @@ import {
   useTransform,
 } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import {
+  capabilities,
+  featuredProjects,
+  processSteps,
+  websiteProjects,
+} from '@/data/portfolio';
+import styles from './home.module.css';
 
 const ease = [0.22, 1, 0.36, 1];
+const spring = { type: 'spring', stiffness: 220, damping: 24, mass: 0.75 };
 
-const projects = [
-  {
-    id: 'mealrecap',
-    name: 'MealRecap',
-    kicker: 'AI nutrition product',
-    year: '2026',
-    href: 'https://mealrecap.vercel.app',
-    description:
-      'A calmer way to log food. Natural-language, voice, and photo-first input turn everyday meals into a useful daily nutrition recap.',
-    role: 'Product strategy · UI/UX · Full-stack build',
-    visual: 'meal',
-    size: 'wide',
-  },
-  {
-    id: 'beforeuscroll',
-    name: 'BeforeUScroll',
-    kicker: 'iOS product',
-    year: '2026',
-    href: 'https://beforeuscroll.vercel.app',
-    description:
-      'An intentional friction layer before distracting apps open—built around Scripture, prayer, and reclaiming attention.',
-    role: 'Concept · Product design · Swift / iOS',
-    visual: 'scroll',
-    size: 'tall',
-  },
-  {
-    id: 'kdym',
-    name: 'KDYM',
-    kicker: 'Digital platform',
-    year: '2024–2026',
-    href: 'https://www.kdym.org',
-    description:
-      'A living digital home for Kansas District Youth Ministries: events, registration, media, merch, and the 2026 Outpour campaign system.',
-    role: 'Creative direction · Web design · Development',
-    visual: 'kdym',
-    size: 'standard',
-  },
-  {
-    id: 'hacia',
-    name: 'HACIA',
-    kicker: 'Website redesign',
-    year: '2024–2026',
-    href: 'https://hacia.co.zw',
-    description:
-      'A responsive school platform rebuilt around clearer information architecture, stronger visual hierarchy, and a more premium admissions experience.',
-    role: 'UX · UI system · Front-end delivery',
-    image: '/work/hacia-1.webp',
-    size: 'standard',
-  },
-  {
-    id: 'aftershock',
-    name: 'Aftershock',
-    kicker: 'Campus ministry website',
-    year: '2024–2025',
-    href: 'https://www.aftershockministries.com',
-    description:
-      'A focused responsive site built to establish trust quickly and move university students from discovery into community.',
-    role: 'UX · Web design · Development',
-    image: '/work/aftershock-1.webp',
-    size: 'standard',
-  },
-  {
-    id: 'gocreate',
-    name: 'GoCreate / WSU ITS',
-    kicker: 'Systems + operations',
-    year: '2024–2025',
-    href: 'https://gocreate.com',
-    description:
-      'Digital workflow and operational systems work inside a live university-affiliated innovation environment.',
-    role: 'Systems thinking · Digital operations · Support',
-    image: '/work/gocreate-1.webp',
-    size: 'standard',
-  },
-];
-
-const services = [
-  {
-    number: '01',
-    title: 'Mobile apps',
-    summary: 'From product idea to an interface that feels native, intentional, and ready to ship.',
-    detail: 'Product definition · UX flows · Swift / iOS · API integration · launch polish',
-  },
-  {
-    number: '02',
-    title: 'Web apps',
-    summary: 'Fast, expressive products where design and engineering are treated as one system.',
-    detail: 'Next.js · React · full-stack implementation · dashboards · auth · integrations',
-  },
-  {
-    number: '03',
-    title: 'Websites',
-    summary: 'High-conviction marketing sites that make the offer clear and make the work feel valuable.',
-    detail: 'Strategy · information architecture · responsive UI · motion · SEO · performance',
-  },
-];
-
-const archive = [
-  ['FPC Wichita', 'Creative direction + digital systems', 'https://www.fpcwichita.org'],
-  ['Jesus Revealed Podcast', 'Media platform + production', 'https://www.youtube.com/@jesusrevealedpodcast'],
-  ['PosCloud', 'Laravel + React full-stack work', 'https://github.com/sparkdeveloping'],
-  ['Elixer', 'Swift project archive', 'https://github.com/sparkdeveloping/elixer'],
-];
-
-function Arrow({ diagonal = false }) {
-  return <span aria-hidden="true">{diagonal ? '↗' : '→'}</span>;
+function Arrow({ up = false }) {
+  return <span aria-hidden="true">{up ? '↗' : '→'}</span>;
 }
 
-function MagneticLink({ href, children, className = '', target, onClick }) {
+function Reveal({ children, className = '', delay = 0 }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reduced ? false : { opacity: 0, y: 24 }}
+      whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{ duration: 0.72, delay, ease }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function MagneticLink({ href, children, className = '', external = false }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 260, damping: 18, mass: 0.28 });
-  const sy = useSpring(y, { stiffness: 260, damping: 18, mass: 0.28 });
+  const reduced = useReducedMotion();
+  const sx = useSpring(x, { stiffness: 300, damping: 20, mass: 0.35 });
+  const sy = useSpring(y, { stiffness: 300, damping: 20, mass: 0.35 });
 
-  const move = (event) => {
-    if (window.matchMedia('(pointer: coarse)').matches) return;
+  function move(event) {
+    if (reduced || window.matchMedia('(pointer: coarse)').matches) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    x.set((event.clientX - rect.left - rect.width / 2) * 0.12);
-    y.set((event.clientY - rect.top - rect.height / 2) * 0.12);
+    x.set((event.clientX - rect.left - rect.width / 2) * 0.11);
+    y.set((event.clientY - rect.top - rect.height / 2) * 0.11);
+  }
+
+  const shared = {
+    className,
+    onPointerMove: move,
+    onPointerLeave: () => {
+      x.set(0);
+      y.set(0);
+    },
+    style: { x: sx, y: sy },
+    whileTap: reduced ? undefined : { scale: 0.98 },
   };
+
+  if (href.startsWith('/')) {
+    return (
+      <motion.span {...shared}>
+        <Link href={href}>{children}</Link>
+      </motion.span>
+    );
+  }
 
   return (
     <motion.a
       href={href}
-      className={className}
-      target={target}
-      rel={target === '_blank' ? 'noreferrer' : undefined}
-      onClick={onClick}
-      onPointerMove={move}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-      whileTap={{ scale: 0.97 }}
-      style={{ x: sx, y: sy }}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noreferrer' : undefined}
+      {...shared}
     >
       {children}
     </motion.a>
@@ -157,28 +90,37 @@ function MagneticLink({ href, children, className = '', target, onClick }) {
 
 function Header() {
   const [open, setOpen] = useState(false);
+  const links = [
+    ['Work', '#work'],
+    ['Capabilities', '#capabilities'],
+    ['Approach', '#approach'],
+    ['About', '#about'],
+  ];
 
   return (
-    <header className="site-header">
-      <a className="brand" href="#top" aria-label="Denzel Tinashe, back to top">
-        <span className="brand-mark">DT</span>
-        <span className="brand-name">Denzel Tinashe</span>
+    <header className={styles.header}>
+      <a className={styles.brand} href="#top" aria-label="Denzel Tinashe, back to top">
+        <span className={styles.brandMark}>DT</span>
+        <span className={styles.brandText}>Denzel Tinashe</span>
       </a>
 
-      <nav className="desktop-nav" aria-label="Main navigation">
-        <a href="#work">Work</a>
-        <a href="#services">Services</a>
-        <a href="#about">About</a>
+      <nav className={styles.nav} aria-label="Main navigation">
+        {links.map(([label, href]) => (
+          <a key={label} href={href}>{label}</a>
+        ))}
       </nav>
 
-      <MagneticLink className="header-cta" href="mailto:denzelnyatsanza@gmail.com?subject=New%20project%20inquiry">
-        Start a project <Arrow diagonal />
+      <MagneticLink
+        href="mailto:denzelnyatsanza@gmail.com?subject=I%20want%20to%20build%20something"
+        className={styles.headerCta}
+      >
+        <span>Start a project</span><Arrow up />
       </MagneticLink>
 
       <button
-        className="menu-button"
         type="button"
-        aria-label="Toggle menu"
+        className={styles.menuButton}
+        aria-label="Toggle navigation"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
       >
@@ -189,17 +131,22 @@ function Header() {
       <AnimatePresence>
         {open && (
           <motion.nav
-            className="mobile-nav"
-            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            className={styles.mobileNav}
+            aria-label="Mobile navigation"
+            initial={{ opacity: 0, y: -10, scale: 0.985 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.98 }}
-            transition={{ duration: 0.28, ease }}
+            exit={{ opacity: 0, y: -10, scale: 0.985 }}
+            transition={{ duration: 0.25, ease }}
           >
-            {['work', 'services', 'about', 'contact'].map((item) => (
-              <a key={item} href={`#${item}`} onClick={() => setOpen(false)}>
-                {item}
-              </a>
+            {links.map(([label, href]) => (
+              <a key={label} href={href} onClick={() => setOpen(false)}>{label}</a>
             ))}
+            <a
+              href="mailto:denzelnyatsanza@gmail.com?subject=I%20want%20to%20build%20something"
+              onClick={() => setOpen(false)}
+            >
+              Start a project <Arrow up />
+            </a>
           </motion.nav>
         )}
       </AnimatePresence>
@@ -207,402 +154,416 @@ function Header() {
   );
 }
 
-function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  return <motion.div className="scroll-progress" style={{ scaleX: scrollYProgress }} />;
-}
-
-function CursorGlow() {
+function HeroStage() {
+  const wrap = useRef(null);
   const reduced = useReducedMotion();
-  const x = useMotionValue(-500);
-  const y = useMotionValue(-500);
-  const sx = useSpring(x, { stiffness: 100, damping: 22 });
-  const sy = useSpring(y, { stiffness: 100, damping: 22 });
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const rx = useSpring(pointerY, { stiffness: 90, damping: 19, mass: 0.7 });
+  const ry = useSpring(pointerX, { stiffness: 90, damping: 19, mass: 0.7 });
 
-  useEffect(() => {
-    if (reduced) return undefined;
-    const move = (event) => {
-      x.set(event.clientX - 260);
-      y.set(event.clientY - 260);
-    };
-    window.addEventListener('pointermove', move, { passive: true });
-    return () => window.removeEventListener('pointermove', move);
-  }, [reduced, x, y]);
+  function move(event) {
+    if (reduced || window.matchMedia('(pointer: coarse)').matches) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width - 0.5;
+    const py = (event.clientY - rect.top) / rect.height - 0.5;
+    pointerX.set(px * 7);
+    pointerY.set(py * -6);
+  }
 
-  if (reduced) return null;
-  return <motion.div className="cursor-glow" aria-hidden="true" style={{ x: sx, y: sy }} />;
+  function reset() {
+    pointerX.set(0);
+    pointerY.set(0);
+  }
+
+  return (
+    <motion.div
+      ref={wrap}
+      className={styles.heroStage}
+      onPointerMove={move}
+      onPointerLeave={reset}
+      style={{ rotateX: rx, rotateY: ry }}
+      initial={reduced ? false : { opacity: 0, scale: 0.96, y: 20 }}
+      animate={reduced ? undefined : { opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.95, delay: 0.12, ease }}
+    >
+      <div className={styles.stageLight} />
+      <motion.div
+        className={`${styles.productWindow} ${styles.spotlyWindow}`}
+        animate={reduced ? undefined : { y: [0, -7, 0] }}
+        transition={{ duration: 6.4, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className={styles.windowBar}>
+          <div className={styles.windowDots}><i /><i /><i /></div>
+          <span>spotly / operations</span>
+          <em>live</em>
+        </div>
+        <div className={styles.spotlyDashboard}>
+          <aside>
+            <strong>S.</strong>
+            <span>Today</span><span>Orders</span><span>Delivery</span><span>Finance</span>
+          </aside>
+          <div className={styles.dashBody}>
+            <div className={styles.dashHeading}><span>Today</span><small>Business overview</small></div>
+            <div className={styles.metrics}><b>128<small>orders</small></b><b>92%<small>fulfilled</small></b><b>14<small>drivers</small></b></div>
+            <div className={styles.chartBars}>{[42,68,54,86,61,94,74,83].map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}</div>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className={`${styles.phoneShell} ${styles.mealPhone}`}
+        animate={reduced ? undefined : { y: [0, 8, 0], rotate: [-5, -4.2, -5] }}
+        transition={{ duration: 7.2, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className={styles.phoneTop}><span /></div>
+        <div className={styles.mealUi}>
+          <div className={styles.mealHead}><small>Monday</small><strong>MealRecap</strong></div>
+          <div className={styles.ring}><span>1,640<small>of 2,100 kcal</small></span></div>
+          <div className={styles.macroRow}><span><b>112g</b>protein</span><span><b>174g</b>carbs</span><span><b>58g</b>fat</span></div>
+          <div className={styles.mealInput}>“rice, chicken and avocado” <i>↑</i></div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className={`${styles.phoneShell} ${styles.scrollPhone}`}
+        animate={reduced ? undefined : { y: [0, -5, 0], rotate: [7, 6.3, 7] }}
+        transition={{ duration: 6.8, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className={styles.phoneTop}><span /></div>
+        <div className={styles.scrollUi}>
+          <div className={styles.flame}>◇</div>
+          <small>BEFOREUSCROLL</small>
+          <strong>Your Flame is out.</strong>
+          <p>Recharge before the scroll gets you.</p>
+          <span className={styles.shieldAction}>Prepare Recharge</span>
+          <span>Stay Locked</span>
+        </div>
+      </motion.div>
+
+      <div className={styles.stageCaption}>
+        <span>PRODUCT × DESIGN × ENGINEERING</span>
+        <span>2026</span>
+      </div>
+    </motion.div>
+  );
 }
 
 function Hero() {
   const section = useRef(null);
+  const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: section, offset: ['start start', 'end start'] });
-  const copyY = useTransform(scrollYProgress, [0, 1], [0, 80]);
-  const photoY = useTransform(scrollYProgress, [0, 1], [0, 130]);
-  const opacity = useTransform(scrollYProgress, [0, 0.9], [1, 0.45]);
+  const y = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : 80]);
+  const stageY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : 125]);
 
   return (
-    <section className="hero" id="top" ref={section}>
-      <motion.div className="hero-copy" style={{ y: copyY, opacity }}>
-        <motion.p
-          className="micro-label"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease }}
+    <section className={styles.hero} id="top" ref={section}>
+      <motion.div className={styles.heroCopy} style={{ y }}>
+        <motion.div
+          className={styles.eyebrow}
+          initial={reduced ? false : { opacity: 0, y: 12 }}
+          animate={reduced ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease }}
         >
-          Product designer + developer · Wichita, KS → worldwide
-        </motion.p>
+          <span className={styles.statusDot} />
+          Product designer + engineer · iOS / web
+        </motion.div>
 
-        <h1 aria-label="I design and build apps people want to use.">
-          <motion.span
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.04, ease }}
-          >
-            I design & build
+        <h1>
+          <motion.span initial={reduced ? false : { opacity: 0, y: 30 }} animate={reduced ? undefined : { opacity: 1, y: 0 }} transition={{ duration: 0.78, ease }}>
+            I turn ambitious ideas
           </motion.span>
-          <motion.span
-            className="hero-emphasis"
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.12, ease }}
-          >
-            apps people want
+          <motion.span initial={reduced ? false : { opacity: 0, y: 30 }} animate={reduced ? undefined : { opacity: 1, y: 0 }} transition={{ duration: 0.78, delay: 0.06, ease }}>
+            into products people
           </motion.span>
-          <motion.span
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease }}
-          >
-            to use.
+          <motion.span className={styles.heroOutline} initial={reduced ? false : { opacity: 0, y: 30 }} animate={reduced ? undefined : { opacity: 1, y: 0 }} transition={{ duration: 0.78, delay: 0.12, ease }}>
+            want to use.
           </motion.span>
         </h1>
 
-        <motion.div
-          className="hero-bottom"
-          initial={{ opacity: 0, y: 22 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.28, ease }}
-        >
+        <motion.div className={styles.heroFoot} initial={reduced ? false : { opacity: 0 }} animate={reduced ? undefined : { opacity: 1 }} transition={{ duration: 0.7, delay: 0.3 }}>
           <p>
-            I take products from rough idea to polished launch—strategy, interface, motion, code, and the details that make software feel finished.
+            Apps, web products, and high-conviction websites—from the first product decision to launch-quality code.
           </p>
-          <div className="hero-actions">
-            <MagneticLink className="pill pill-dark" href="#work">
-              See selected work <Arrow />
+          <div className={styles.heroActions}>
+            <MagneticLink href="mailto:denzelnyatsanza@gmail.com?subject=I%20want%20to%20build%20something" className={styles.primaryButton}>
+              <span>Tell me what should exist</span><Arrow />
             </MagneticLink>
-            <a className="quiet-link" href="/resume.pdf">
-              Resume <Arrow diagonal />
-            </a>
+            <a href="#work" className={styles.textLink}>See the work <Arrow /></a>
           </div>
         </motion.div>
       </motion.div>
 
-      <motion.div className="hero-portrait-wrap" style={{ y: photoY }}>
-        <motion.div
-          className="hero-portrait"
-          initial={{ opacity: 0, scale: 0.94, rotate: 2 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1, delay: 0.14, ease }}
-          whileHover={{ borderRadius: '38% 62% 49% 51% / 54% 39% 61% 46%' }}
-        >
-          <Image
-            src="/portrait-2026.webp"
-            alt="Denzel Tinashe"
-            fill
-            priority
-            sizes="(max-width: 900px) 88vw, 36vw"
-            className="hero-photo"
-          />
-          <div className="portrait-sheen" aria-hidden="true" />
-        </motion.div>
-        <motion.div
-          className="floating-chip chip-one"
-          animate={{ y: [0, -10, 0], rotate: [-2, 1, -2] }}
-          transition={{ duration: 5.6, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          Next.js · React
-        </motion.div>
-        <motion.div
-          className="floating-chip chip-two"
-          animate={{ y: [0, 12, 0], rotate: [2, -1, 2] }}
-          transition={{ duration: 6.3, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          Swift · iOS
-        </motion.div>
+      <motion.div className={styles.heroStageWrap} style={{ y: stageY }}>
+        <HeroStage />
       </motion.div>
 
-      <div className="hero-rail" aria-hidden="true">
-        <span>Product</span><i />
-        <span>Design</span><i />
-        <span>Code</span><i />
-        <span>Launch</span>
+      <div className={styles.heroRail} aria-hidden="true">
+        <span>01</span><i /><span>04</span>
       </div>
     </section>
   );
 }
 
-function SignalStrip() {
+function ProofStrip() {
+  const items = [
+    ['Native iOS', 'SwiftUI + Apple frameworks'],
+    ['Full-stack web', 'Next.js + production systems'],
+    ['Product ownership', 'Definition through launch'],
+    ['Public code', 'Selected source on GitHub'],
+  ];
   return (
-    <section className="signal-strip" aria-label="Core capabilities">
-      <div>
-        <span>01</span>
-        <strong>One person, design through build</strong>
-      </div>
-      <div>
-        <span>02</span>
-        <strong>Web, iOS, and full-stack products</strong>
-      </div>
-      <div>
-        <span>03</span>
-        <strong>Open-source work on GitHub</strong>
-      </div>
-      <div>
-        <span>04</span>
-        <strong>Built for clarity, speed, and polish</strong>
-      </div>
+    <section className={styles.proofStrip} aria-label="Core capabilities">
+      {items.map(([title, detail]) => (
+        <div key={title}><strong>{title}</strong><span>{detail}</span></div>
+      ))}
     </section>
-  );
-}
-
-function MealVisual() {
-  return (
-    <div className="visual meal-visual" aria-hidden="true">
-      <div className="meal-orbit orbit-a" />
-      <div className="meal-orbit orbit-b" />
-      <div className="device light-device">
-        <div className="device-island" />
-        <div className="meal-head"><b>MealRecap</b><span>Today</span></div>
-        <div className="meal-score"><strong>1,722</strong><span>of 2,200 cal</span></div>
-        <div className="macro-grid"><span><b>85g</b>Protein</span><span><b>137g</b>Carbs</span><span><b>77g</b>Fat</span></div>
-        <div className="meal-entry"><div><b>Rice & chicken</b><small>Lunch · 12:44 PM</small></div><span>370</span></div>
-        <div className="meal-prompt"><span>What did you eat?</span><b>✦</b></div>
-      </div>
-      <div className="visual-label">Natural language → structured nutrition</div>
-    </div>
-  );
-}
-
-function ScrollVisual() {
-  return (
-    <div className="visual scroll-visual" aria-hidden="true">
-      <div className="halo-ring" />
-      <div className="device dark-device">
-        <div className="device-island" />
-        <div className="scroll-head"><b>BeforeUScroll</b><span>12:41</span></div>
-        <div className="flame-mark">✦</div>
-        <strong className="time-left">42 min</strong>
-        <span className="time-caption">intentional time remaining</span>
-        <div className="verse-card">Set your affection on things above…<b>Colossians 3:2</b></div>
-        <div className="unlock-row"><span>Pray</span><span>Read</span><span>Continue</span></div>
-      </div>
-    </div>
-  );
-}
-
-function KdymVisual() {
-  return (
-    <div className="visual kdym-visual" aria-hidden="true">
-      <div className="outpour-stack"><span>OUTPOUR</span><span>OUTPOUR</span><span>OUTPOUR</span><span>OUTPOUR</span></div>
-      <div className="outpour-core"><small>2026 DISTRICT THEME</small><b>JOEL 2:28</b><p>I will pour out my spirit upon all flesh.</p></div>
-    </div>
   );
 }
 
 function ProjectVisual({ project }) {
-  if (project.visual === 'meal') return <MealVisual />;
-  if (project.visual === 'scroll') return <ScrollVisual />;
-  if (project.visual === 'kdym') return <KdymVisual />;
+  if (project.tone === 'meal') {
+    return (
+      <div className={`${styles.projectVisual} ${styles.visualMeal}`}>
+        <div className={styles.bigPhone}>
+          <div className={styles.bigPhoneTop}><span /></div>
+          <div className={styles.bigMealUi}>
+            <div><small>YOUR MONDAY</small><b>Good afternoon.</b></div>
+            <div className={styles.bigRing}><span>1,640<small>CALORIES</small></span></div>
+            <div className={styles.foodList}><span>Breakfast <b>420</b></span><span>Lunch <b>670</b></span><span>Dinner <b>550</b></span></div>
+            <div className={styles.voicePill}>Type, speak, or snap <i>+</i></div>
+          </div>
+        </div>
+        <div className={styles.visualNote}><span>01</span><p>Natural input. Structured nutrition. Server-side AI.</p></div>
+      </div>
+    );
+  }
+
+  if (project.tone === 'spotly') {
+    return (
+      <div className={`${styles.projectVisual} ${styles.visualSpotly}`}>
+        <div className={styles.networkGrid}>
+          {['Customer', 'Business', 'Driver', 'Staff', 'Admin'].map((label, index) => (
+            <motion.div key={label} whileHover={{ y: -4 }} transition={spring}>
+              <span>0{index + 1}</span><strong>{label}</strong><small>spotlyafrica.com</small>
+            </motion.div>
+          ))}
+        </div>
+        <div className={styles.networkLine}><i /><span>ONE SHARED SESSION BRIDGE</span><i /></div>
+      </div>
+    );
+  }
+
+  if (project.tone === 'insights') {
+    return (
+      <div className={`${styles.projectVisual} ${styles.visualInsights}`}>
+        <div className={styles.insightPanel}>
+          <div className={styles.insightTop}><span>GoCreate / Insights</span><small>DATA AS OF 09.11.26</small></div>
+          <div className={styles.insightStats}><b>2,383<small>member records</small></b><b>2,125<small>applications</small></b><b>513<small>paper rows</small></b></div>
+          <div className={styles.insightChart}>{[30,48,44,58,70,62,81,77,91,84,96,88].map((value, index) => <i key={index} style={{ height: `${value}%` }} />)}</div>
+          <div className={styles.insightLegend}><span><i /> Tracker source</span><span><i /> Reconciled manual</span><span><i /> Review queue</span></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="visual screenshot-visual">
-      <Image src={project.image} alt="" fill sizes="(max-width: 900px) 100vw, 48vw" className="project-screenshot" />
-      <div className="screen-glass" aria-hidden="true" />
+    <div className={`${styles.projectVisual} ${styles.visualScroll}`}>
+      <div className={styles.shieldFrame}>
+        <span className={styles.shieldIcon}>◇</span>
+        <small>SCREEN TIME SHIELD</small>
+        <strong>Your Flame is out.</strong>
+        <p>Open BeforeUScroll to recharge before the scroll gets you.</p>
+        <span className={styles.shieldAction}>Prepare Recharge</span>
+        <span>Stay Locked</span>
+      </div>
+      <div className={styles.systemTags}><span>FamilyControls</span><span>ManagedSettings</span><span>DeviceActivity</span></div>
     </div>
   );
 }
 
-function ProjectCard({ project, index }) {
+function FeaturedProject({ project, index }) {
   return (
-    <motion.a
-      href={project.href}
-      target="_blank"
-      rel="noreferrer"
-      className={`project-card project-${project.size}`}
-      initial={{ opacity: 0, y: 48 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.7, delay: Math.min(index * 0.06, 0.2), ease }}
-      whileHover={{ y: -8 }}
-    >
-      <div className="project-visual-shell">
-        <ProjectVisual project={project} />
-        <motion.span className="project-arrow" whileHover={{ rotate: 45 }}>↗</motion.span>
+    <article className={styles.project}>
+      <div className={styles.projectMeta}>
+        <span>{project.index}</span>
+        <span>{project.label}</span>
       </div>
-      <div className="project-meta">
-        <div>
-          <p>{project.kicker}</p>
-          <h3>{project.name}</h3>
-        </div>
-        <span>{project.year}</span>
+
+      <Reveal className={styles.projectHeading}>
+        <h3>{project.name}</h3>
+        <p>{project.statement}</p>
+      </Reveal>
+
+      <Reveal className={styles.projectVisualWrap} delay={0.04}>
+        <Link href={`/work/${project.slug}`} aria-label={`Read ${project.name} case study`}>
+          <motion.div whileHover={{ scale: 0.992 }} transition={spring}>
+            <ProjectVisual project={project} />
+          </motion.div>
+        </Link>
+      </Reveal>
+
+      <div className={styles.projectDetailGrid}>
+        <Reveal>
+          <p className={styles.projectSummary}>{project.summary}</p>
+          <div className={styles.projectLinks}>
+            <Link href={`/work/${project.slug}`}>Case study <Arrow /></Link>
+            {project.live && <a href={project.live} target="_blank" rel="noreferrer">Live product <Arrow up /></a>}
+            <a href={project.github} target="_blank" rel="noreferrer">Source <Arrow up /></a>
+          </div>
+        </Reveal>
+        <Reveal className={styles.projectOwnership} delay={0.06}>
+          <small>WHAT I OWNED</small>
+          <div>{project.ownership.map((item) => <span key={item}>{item}</span>)}</div>
+        </Reveal>
+        <Reveal className={styles.projectProof} delay={0.1}>
+          <small>PROOF IN THE BUILD</small>
+          <ul>{project.proof.map((item) => <li key={item}>{item}</li>)}</ul>
+        </Reveal>
       </div>
-      <p className="project-description">{project.description}</p>
-      <div className="project-role">{project.role}</div>
-    </motion.a>
+
+      {index < featuredProjects.length - 1 && <div className={styles.projectDivider} />}
+    </article>
   );
 }
 
 function Work() {
   return (
-    <section className="work section" id="work">
-      <div className="section-heading work-heading">
-        <div>
-          <p className="micro-label">Selected work</p>
-          <h2>Products should feel<br />inevitable.</h2>
-        </div>
-        <p>
-          Not a gallery of mockups. These are products, websites, and systems made for real people, real organizations, and real constraints.
-        </p>
+    <section className={styles.work} id="work">
+      <div className={styles.sectionIntro}>
+        <Reveal><span className={styles.sectionIndex}>01 / SELECTED WORK</span></Reveal>
+        <Reveal delay={0.04}><h2>Not mockups.<br />Working systems.</h2></Reveal>
+        <Reveal delay={0.08}><p>Selected products where the interesting part is not just how the screen looks—it is the product decision, architecture, edge case, and implementation behind it.</p></Reveal>
       </div>
-
-      <div className="project-grid">
-        {projects.map((project, index) => <ProjectCard key={project.id} project={project} index={index} />)}
+      <div className={styles.projects}>
+        {featuredProjects.map((project, index) => <FeaturedProject key={project.slug} project={project} index={index} />)}
       </div>
     </section>
   );
 }
 
-function Services() {
+function Websites() {
   return (
-    <section className="services section" id="services">
-      <div className="section-heading service-heading">
+    <section className={styles.websites}>
+      <div className={styles.websiteIntro}>
+        <span>WEB / BRAND / CONVERSION</span>
         <div>
-          <p className="micro-label">What I build</p>
-          <h2>One partner.<br />Fewer handoffs.</h2>
+          <h2>A broader body of deployed website work.</h2>
+          <p>Churches, events, education, and organizations—each treated as a real product with a specific audience, conversion path, content system, and production constraint.</p>
         </div>
-        <p>
-          The strongest projects do not separate product thinking, visual design, and implementation too early. I can carry the core experience across all three.
-        </p>
       </div>
-
-      <div className="service-list">
-        {services.map((service) => (
+      <div className={styles.websiteGrid}>
+        {websiteProjects.map((project, index) => (
           <motion.article
-            key={service.number}
-            className="service-card"
-            whileHover={{ borderRadius: '58px 22px 58px 22px' }}
-            transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+            key={project.name}
+            className={styles.websiteCard}
+            whileHover={{ y: -5 }}
+            transition={spring}
           >
-            <span className="service-number">{service.number}</span>
-            <h3>{service.title}</h3>
-            <p>{service.summary}</p>
-            <div>{service.detail}</div>
+            <div className={styles.websiteCardTop}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <span>{project.status}</span>
+            </div>
+            <a href={project.href} target="_blank" rel="noreferrer" className={styles.websiteVisualLink} aria-label={`Open ${project.name}`}>
+              {project.image ? (
+                <div className={styles.websiteImage}><Image src={project.image} alt="" fill sizes="(max-width: 800px) 90vw, 25vw" /></div>
+              ) : (
+                <div className={styles.websiteWordmark}><strong>{project.mark}</strong><small>{project.name}</small></div>
+              )}
+            </a>
+            <div className={styles.websiteCardBottom}>
+              <strong>{project.name}</strong>
+              <span>{project.type}</span>
+              <div className={styles.websiteActions}>
+                <a href={project.href} target="_blank" rel="noreferrer">Live <Arrow up /></a>
+                {project.repo && <a href={project.repo} target="_blank" rel="noreferrer">Source <Arrow up /></a>}
+              </div>
+            </div>
           </motion.article>
         ))}
       </div>
-
-      <div className="stack-line" aria-label="Technology stack">
-        <span>Next.js</span><i />
-        <span>React</span><i />
-        <span>Swift</span><i />
-        <span>iOS</span><i />
-        <span>Node</span><i />
-        <span>Laravel</span><i />
-        <span>Framer Motion</span><i />
-        <span>Vercel</span>
-      </div>
     </section>
   );
 }
 
-function Process() {
-  const steps = [
-    ['01', 'Define', 'What are we making, who is it for, and what must the first version prove?'],
-    ['02', 'Design', 'Flows, hierarchy, interface language, prototypes, and the details that make the product understandable.'],
-    ['03', 'Build', 'Production implementation with responsive behavior, motion, integrations, and sensible technical decisions.'],
-    ['04', 'Polish + launch', 'Performance, edge cases, accessibility, final QA, and the last 10% that makes the work feel expensive.'],
-  ];
-
+function Capabilities() {
   return (
-    <section className="process section">
-      <div className="process-title">
-        <p className="micro-label">The operating model</p>
-        <h2>Think clearly.<br />Make deliberately.<br />Ship.</h2>
+    <section className={styles.capabilities} id="capabilities">
+      <div className={styles.capabilityHeading}>
+        <span className={styles.sectionIndex}>02 / CAPABILITIES</span>
+        <h2>One product mind across the whole build.</h2>
+        <p>Less translation between strategy, design, and engineering. More continuity from what the product should do to how it actually behaves.</p>
       </div>
-      <div className="process-steps">
-        {steps.map(([number, title, body]) => (
-          <article key={number}>
-            <span>{number}</span>
-            <h3>{title}</h3>
-            <p>{body}</p>
-          </article>
+      <div className={styles.capabilityList}>
+        {capabilities.map((item, index) => (
+          <motion.article key={item.title} className={styles.capabilityItem} whileHover="hover">
+            <span>0{index + 1}</span>
+            <div><h3>{item.title}</h3><p>{item.body}</p></div>
+            <small>{item.deliverables}</small>
+            <motion.i variants={{ hover: { x: 5 } }} transition={spring}>→</motion.i>
+          </motion.article>
         ))}
       </div>
     </section>
   );
 }
 
-function Archive() {
+function Approach() {
   return (
-    <section className="archive section">
-      <div className="archive-head">
-        <div>
-          <p className="micro-label">More proof</p>
-          <h2>There’s more<br />under the hood.</h2>
-        </div>
-        <p>
-          The homepage stays selective. The broader body of work—older products, experiments, backend code, and public repositories—lives on GitHub and in the archive below.
-        </p>
+    <section className={styles.approach} id="approach">
+      <div className={styles.approachSticky}>
+        <span className={styles.sectionIndex}>03 / APPROACH</span>
+        <h2>Make the right thing.<br />Then make it excellent.</h2>
+        <p>Visual polish matters. It matters more after the product logic, states, architecture, and user path make sense.</p>
       </div>
-      <div className="archive-table">
-        {archive.map(([name, type, href], index) => (
-          <a href={href} target="_blank" rel="noreferrer" key={name}>
-            <span>{String(index + 1).padStart(2, '0')}</span>
-            <strong>{name}</strong>
-            <em>{type}</em>
-            <b>↗</b>
-          </a>
+      <div className={styles.processList}>
+        {processSteps.map(([number, title, body]) => (
+          <Reveal key={number} className={styles.processStep}>
+            <span>{number}</span><div><h3>{title}</h3><p>{body}</p></div>
+          </Reveal>
         ))}
       </div>
-      <MagneticLink href="https://github.com/sparkdeveloping" target="_blank" className="github-card">
-        <div>
-          <span className="micro-label">github.com/sparkdeveloping</span>
-          <strong>Explore the code archive</strong>
-          <p>40+ public repositories spanning Swift, JavaScript, full-stack web work, and experiments.</p>
-        </div>
-        <Arrow diagonal />
-      </MagneticLink>
     </section>
   );
 }
 
 function About() {
   return (
-    <section className="about section" id="about">
-      <div className="about-main">
-        <p className="micro-label">About</p>
-        <h2>
-          Design-minded developer.<br />Developer-minded designer.
-        </h2>
-        <div className="about-copy">
-          <p className="about-lead">
-            I care about the part clients actually feel: whether the product is clear, fast, useful, memorable, and finished.
-          </p>
-          <p>
-            I work across product strategy, interface design, front-end engineering, iOS, and full-stack implementation. That range lets me protect the idea from the first conversation through the final interaction instead of letting it disappear between handoffs.
-          </p>
-          <p className="faith-note">Jesus above all. Excellence in the work because the work should be worth doing well.</p>
+    <section className={styles.about} id="about">
+      <Reveal className={styles.aboutPortrait}>
+        <div className={styles.portraitFrame}>
+          <Image
+            src="/portrait-2026.webp"
+            alt="Portrait of Denzel Tinashe"
+            fill
+            sizes="(max-width: 800px) 92vw, 40vw"
+            priority={false}
+          />
         </div>
-      </div>
+        <div className={styles.portraitNote}><span>Denzel Tinashe</span><span>Product designer + engineer</span></div>
+      </Reveal>
 
-      <div className="practice-links">
-        <a href="https://media.denzeltinashe.com" target="_blank" rel="noreferrer">
-          <div><span>Separate practice</span><strong>Media</strong><p>Photo, video, creative direction, and production live here.</p></div>
-          <Arrow diagonal />
-        </a>
-        <a href="https://ministry.denzeltinashe.com" target="_blank" rel="noreferrer">
-          <div><span>Separate practice</span><strong>Ministry</strong><p>Ministry-specific work, resources, and service live here.</p></div>
-          <Arrow diagonal />
-        </a>
+      <div className={styles.aboutCopy}>
+        <span className={styles.sectionIndex}>04 / ABOUT</span>
+        <Reveal><h2>I care about the parts people notice—and the parts they should never have to notice.</h2></Reveal>
+        <Reveal delay={0.05}>
+          <p>
+            I design and build software across native iOS, full-stack web products, operational systems, and conversion-focused websites. My best work happens when I can understand the actual problem, make the product decisions, and carry that thinking all the way into the implementation.
+          </p>
+        </Reveal>
+        <Reveal delay={0.08}>
+          <div className={styles.aboutFacts}>
+            <div><small>BASED IN</small><span>Wichita, Kansas · working worldwide</span></div>
+            <div><small>PRIMARY STACK</small><span>SwiftUI · Next.js · React · Firebase · Vercel</span></div>
+            <div><small>PUBLIC WORK</small><a href="https://github.com/sparkdeveloping" target="_blank" rel="noreferrer">github.com/sparkdeveloping <Arrow up /></a></div>
+          </div>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className={styles.otherWorlds}>
+            <a href="https://media.denzeltinashe.com"><span>Media work</span><Arrow up /></a>
+            <a href="https://ministry.denzeltinashe.com"><span>Ministry</span><Arrow up /></a>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -610,44 +571,47 @@ function About() {
 
 function Contact() {
   return (
-    <footer className="contact" id="contact">
-      <div className="contact-orb" aria-hidden="true" />
-      <p className="micro-label">Have an app or website in mind?</p>
-      <h2>
-        Let’s make it<br /><span>feel finished.</span>
-      </h2>
-      <MagneticLink
-        className="contact-email"
-        href="mailto:denzelnyatsanza@gmail.com?subject=New%20project%20inquiry%20—%20Denzel%20Tinashe"
-      >
-        denzelnyatsanza@gmail.com <Arrow diagonal />
-      </MagneticLink>
-      <div className="footer-meta">
+    <section className={styles.contact} id="contact">
+      <div className={styles.contactNoise} aria-hidden="true" />
+      <div className={styles.contactTop}>
+        <span>05 / START SOMETHING</span>
+        <span>APP · WEB APP · WEBSITE</span>
+      </div>
+      <Reveal className={styles.contactMain}>
+        <p>Have a product in your head?</p>
+        <h2>Tell me what<br />should exist.</h2>
+        <MagneticLink href="mailto:denzelnyatsanza@gmail.com?subject=I%20want%20to%20build%20something" className={styles.contactButton}>
+          <span>Start a project</span><Arrow />
+        </MagneticLink>
+      </Reveal>
+      <div className={styles.contactBottom}>
         <span>© {new Date().getFullYear()} Denzel Tinashe</span>
         <div>
-          <a href="https://www.linkedin.com/in/denzelnyatsanza/" target="_blank" rel="noreferrer">LinkedIn</a>
           <a href="https://github.com/sparkdeveloping" target="_blank" rel="noreferrer">GitHub</a>
-          <a href="https://instagram.com/denzeltinashe" target="_blank" rel="noreferrer">Instagram</a>
-          <a href="#top">Back to top ↑</a>
+          <a href="https://media.denzeltinashe.com">Media</a>
+          <a href="https://ministry.denzeltinashe.com">Ministry</a>
         </div>
       </div>
-    </footer>
+    </section>
   );
 }
 
 export default function Home() {
+  useEffect(() => {
+    document.documentElement.dataset.portfolio = 'v2';
+    return () => { delete document.documentElement.dataset.portfolio; };
+  }, []);
+
   return (
     <MotionConfig reducedMotion="user">
-      <main>
-        <ScrollProgress />
-        <CursorGlow />
+      <main className={styles.page}>
         <Header />
         <Hero />
-        <SignalStrip />
+        <ProofStrip />
         <Work />
-        <Services />
-        <Process />
-        <Archive />
+        <Websites />
+        <Capabilities />
+        <Approach />
         <About />
         <Contact />
       </main>

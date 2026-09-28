@@ -1,0 +1,29 @@
+Denzel Tinashe Portfolio V2.3 — Reliable Split Download
+
+WHY THIS IS SPLIT
+The original complete ZIP is approximately 81 MB. Some ChatGPT clients fail large attachment downloads even when the file itself is valid. These smaller archives reconstruct the same V2.3 project.
+
+DOWNLOAD ALL FILES
+1. denzel-tinashe-portfolio-v2.3-core.zip
+2. denzel-tinashe-portfolio-v2.3-gallery-downloads-1.zip
+3. denzel-tinashe-portfolio-v2.3-gallery-downloads-2.zip
+4. denzel-tinashe-portfolio-v2.3-gallery-downloads-3.zip
+5. denzel-tinashe-portfolio-v2.3-gallery-bundle-part-1.zip
+6. denzel-tinashe-portfolio-v2.3-gallery-bundle-part-2.zip
+7. denzel-tinashe-portfolio-v2.3-gallery-bundle-part-3.zip
+
+HOW TO RESTORE
+Extract every ZIP into the SAME parent directory. They all contain the same root folder:
+  denzel-tinashe-portfolio-v2.3
+
+Then rebuild the existing downloadable Gabby gallery bundle:
+
+macOS / Linux:
+  cd denzel-tinashe-portfolio-v2.3
+  ./restore-v2.3.sh
+
+Windows PowerShell:
+  cd denzel-tinashe-portfolio-v2.3
+  powershell -ExecutionPolicy Bypass -File .\restore-v2.3.ps1
+
+The application source, audits, case studies, configuration, ordinary assets and gallery previews are all in the core ZIP. The gallery-download ZIPs restore the original JPEGs. The final three ZIPs restore the binary parts used to reconstruct public/client/gabby/Gabby-Final-Gallery.zip.
