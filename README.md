@@ -1,22 +1,33 @@
-# Denzel Tinashe — Portfolio
+# Denzel Tinashe — Product Portfolio
 
-A focused portfolio for ministry, media, and web/mobile product development.
+A product-focused Next.js portfolio for Denzel Tinashe, centered on mobile apps, web apps, and websites.
 
-## Direction
+## Positioning
 
-The redesign uses an editorial, high-contrast visual system with elastic shapes, spring-based interactions, layered parallax, oversized typography, and custom project artwork. Motion is intentionally scroll-native rather than scroll-hijacked, and the experience respects the user's reduced-motion preference.
+The main domain is intentionally focused on product design and development. Media and ministry are routed to dedicated subdomains so the primary portfolio remains clear for people looking to hire Denzel to design and build software.
 
-The work index includes:
+## Featured work
 
 - MealRecap
 - BeforeUScroll
 - KDYM
-- FPC Wichita
-- Jesus Revealed Podcast
-- Aftershock Ministries
+- HACIA
+- Aftershock
 - GoCreate / Wichita State ITS
-- Hacia
-- PosCloud
+
+A compact archive links to additional work and the broader GitHub profile.
+
+## Visual system
+
+- monochrome product aesthetic
+- responsive oversized typography
+- elastic / rubber geometry
+- spring-based interactions
+- glass navigation
+- grayscale-to-color project imagery
+- device-based app compositions
+- native scrolling
+- reduced-motion support
 
 ## Run locally
 
@@ -27,13 +38,31 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Main files
+## Build
 
-- `app/page.js` — content, projects, interactions, and page structure
-- `app/globals.css` — visual system, responsive behavior, and motion styling
-- `app/layout.js` — metadata and fonts
-- `public/work/` — optimized WebP project images plus original source images
+```bash
+npm run build
+npm run start
+```
 
-## Deployment
+## Important files
 
-The project is ready for a standard Vercel deployment. Update project copy and links in the `projects` and `practices` arrays near the top of `app/page.js`.
+- `app/page.js` — redesigned public homepage
+- `app/globals.css` — visual system and responsive behavior
+- `app/layout.js` — SEO and social metadata
+- `public/portrait-2026.webp` — optimized headshot extracted from the supplied RAW file
+- `PORTFOLIO_AUDIT_2026.md` — full audit and rationale
+- `REDESIGN_NOTES.md` — implementation notes
+
+## Existing routes preserved
+
+The redesign does not remove the existing client portal, API routes, or gallery routes contained in this project.
+
+## Subdomains
+
+The main portfolio links out to:
+
+- `media.denzeltinashe.com`
+- `ministry.denzeltinashe.com`
+
+Those subdomains must be configured at the hosting / DNS layer to resolve to their respective projects.

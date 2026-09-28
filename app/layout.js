@@ -15,15 +15,23 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   metadataBase: new URL('https://denzeltinashe.com'),
-  title: 'Denzel Tinashe — Ministry, Media & Web/Mobile Apps',
+  title: 'Denzel Tinashe — Product Designer & Developer',
   description:
-    'Denzel Tinashe builds ministry platforms, media systems, websites, and mobile products with conviction and disciplined excellence.',
+    'Denzel Tinashe designs and builds polished mobile apps, web apps, and high-conviction websites from product idea through launch.',
   openGraph: {
-    title: 'Denzel Tinashe — Ministry, Media & Web/Mobile Apps',
-    description: 'Ministry. Media. Web and mobile products.',
+    title: 'Denzel Tinashe — Product Designer & Developer',
+    description: 'Mobile apps, web apps, and websites — designed and built from idea to launch.',
     type: 'website',
     url: 'https://denzeltinashe.com',
+    images: ['/portrait-2026.webp'],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Denzel Tinashe — Product Designer & Developer',
+    description: 'Mobile apps, web apps, and websites — designed and built from idea to launch.',
+    images: ['/portrait-2026.webp'],
+  },
+  alternates: { canonical: '/' },
 };
 
 export default function RootLayout({ children }) {
