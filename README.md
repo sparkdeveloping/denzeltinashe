@@ -1,39 +1,17 @@
-# Denzel Tinashe Portfolio — Audited V2.3
+# Denzel Tinashe Portfolio — V2.4
 
-# Denzel Tinashe Portfolio — Benchmark V2
+Proof-first product design + engineering portfolio built with Next.js.
 
-A product-first portfolio for Denzel Tinashe, rebuilt after a competitive audit of Apple design guidance, former Apple product/design portfolios, independent app builders, hiring-side portfolio research, YouTube portfolio reviews, and the connected `sparkdeveloping` GitHub account.
+## Main routes
 
-## Positioning
-
-**Product designer + engineer for native iOS apps, full-stack web products, and high-conviction websites.**
-
-The site is designed for founders, operators, teams, and hiring decision-makers who need evidence that Denzel can reason about a product and build it—not only style it.
-
-## Featured work
-
-- MealRecap
-- Spotly
-- GoCreate Insights
-- BeforeUScroll
-
-Alayna and Lexi are intentionally excluded.
-
-## Deployed website proof
-
-The supporting website section now explicitly includes:
-
-- FPC Wichita — `fpcwichita.vercel.app`
-- St. Mark Cathedral COGIC — `smccogic.vercel.app`
-- POM Church — `pomchurch.vercel.app`
-- Oil City Church — `oilcitychurch.vercel.app`
-- Calvary Apostolic Church — `calvaryapostolicchurch.vercel.app`
-- KDYM
-- HACIA
-- Aftershock
-
-Where a public `sparkdeveloping` repository is available, the site exposes a separate **Source** link next to the live deployment.
-
+- `/` — portfolio homepage
+- `/work/mealrecap`
+- `/work/spotly`
+- `/work/gocreate-insights`
+- `/work/beforeuscroll`
+- `/start` — structured project inquiry
+- `/clients` — preserved client portal
+- `/gabby` — preserved client gallery
 
 ## Run
 
@@ -42,20 +20,25 @@ npm ci
 npm run dev
 ```
 
-Production validation:
+Production:
 
 ```bash
 npm run build
 npm start
 ```
 
-## Important supporting documents
+## Inquiry delivery
 
-- `COMPETITIVE_AUDIT_2026.md` — external benchmark, GitHub audit, strategy, QA status.
-- `V2_IMPLEMENTATION_NOTES.md` — implementation summary.
-- `CLIENT_PORTAL_SETUP.md` — existing client portal documentation.
-- `CLIENT_GALLERY_AUDIT.md` — existing gallery/client asset notes.
+The `/start` form uses `/api/inquiry`. Configure `RESEND_API_KEY` and preferably a verified `PROJECT_INQUIRY_FROM` sender in Vercel. `PROJECT_INQUIRY_TO` defaults to `denzelnyatsanza@gmail.com`.
 
-## Existing routes preserved
+If Resend is not configured, the interface provides a pre-filled email fallback rather than reporting false success.
 
-The redesign intentionally leaves the supplied client portal, API route tree, client galleries, and Gabby gallery intact. Homepage and portfolio case-study styling are scoped separately to reduce regression risk.
+## SEO / discovery
+
+V2.4 includes metadata, canonical URLs, JSON-LD, `robots.txt`, `sitemap.xml`, web manifest, and dedicated Open Graph images for the homepage and featured case studies.
+
+## Preserved private/client functionality
+
+Client portal APIs, client workspace components, Gabby gallery routes, and client asset behavior were preserved. Client/Gabby routes remain excluded from indexing.
+
+See `V2.4_TRANSFORMATION_AUDIT.md` for the applied audit and remaining release QA.

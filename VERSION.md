@@ -1,15 +1,9 @@
-# Denzel Tinashe Portfolio — V2.3
+# Version
 
-This is the canonical audited V2.3 handoff.
+**Denzel Tinashe Portfolio V2.4 — Proof-First Transformation**
 
-Applied in this build:
-- Product-first positioning for app, web-product, and website clients.
-- Four deep product stories: MealRecap, Spotly, GoCreate Insights, BeforeUScroll.
-- Eight website proofs: FPC Wichita, St. Mark Cathedral COGIC, POM Church, Oil City Church, Calvary Apostolic Church, KDYM, HACIA, Aftershock.
-- Live/source links where available.
-- Alayna and Lexi intentionally excluded from portfolio presentation.
-- Media routed to media.denzeltinashe.com and ministry routed to ministry.denzeltinashe.com.
-- Existing client portal/gallery infrastructure preserved.
-- Competitive audit and implementation notes included in the repository root.
+Date: 2026-09-28
 
-Generated: 2026-09-28
+Major changes: conversion CTA fix, proof-first product presentation, deeper case studies, real BeforeUScroll product screens, deployed-web hierarchy, experience/resume path, structured project inquiry, SEO metadata routes, structured data, stronger security headers, and smaller client-side hydration surface.
+
+See `V2.4_TRANSFORMATION_AUDIT.md` for the full applied audit.
